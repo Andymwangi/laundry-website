@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Metadata } from "next";
 import { stats } from "@/lib/constants";
@@ -17,6 +16,34 @@ const iconMap = {
   ThumbsUp: ThumbsUp,
 };
 
+// Updated stats to show the new values
+const updatedStats = [
+  {
+    id: "customers",
+    label: "Happy Customers",
+    value: "500+",
+    icon: "Users"
+  },
+  {
+    id: "years",
+    label: "Years in Business",
+    value: "3",
+    icon: "Calendar"
+  },
+  {
+    id: "loads",
+    label: "Loads Processed",
+    value: "3000+",
+    icon: "ShoppingBag"
+  },
+  {
+    id: "satisfaction",
+    label: "Customer Satisfaction",
+    value: "99%",
+    icon: "ThumbsUp"
+  }
+];
+
 export default function StatsPage() {
   return (
     <main className="container mx-auto py-12 px-4 md:px-6">
@@ -30,7 +57,7 @@ export default function StatsPage() {
 
       <section className="mb-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat) => {
+          {updatedStats.map((stat) => {
             const Icon = iconMap[stat.icon as keyof typeof iconMap] || CircleIcon;
             
             return (
@@ -161,7 +188,7 @@ export default function StatsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
               </div>
-              <CardTitle className="text-2xl font-bold">10k+</CardTitle>
+              <CardTitle className="text-2xl font-bold">5k+</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600">Reusable packaging bags in circulation</p>

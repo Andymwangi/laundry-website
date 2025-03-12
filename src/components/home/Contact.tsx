@@ -96,7 +96,7 @@ export default function ContactPage() {
                 <Clock className="h-6 w-6 text-blue-500" />
                 <div>
                   <h3 className="font-semibold">Business Hours</h3>
-                  <p className="text-muted-foreground mt-1">Monday - Friday: 7:00 AM - 8:00 PM</p>
+                  <p className="text-muted-foreground mt-1">Monday - Friday: 7:00 AM - 9:00 PM</p>
                   <p className="text-muted-foreground">Saturday: 8:00 AM - 6:00 PM</p>
                   <p className="text-muted-foreground">Sunday: 10:00 AM - 4:00 PM</p>
                 </div>

@@ -13,8 +13,8 @@ const Footer = () => {
               <Image 
                 src="/images/favicon.ico" 
                 alt="Laundry Basket" 
-                width={20} 
-                height={20} 
+                width={10} 
+                height={10} 
                 className="w-auto h-auto round-md"
               />
               <span className="text-xl font-bold">Laundry Basket</span>
@@ -25,16 +25,16 @@ const Footer = () => {
               can focus on what matters most.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://facebook.com" className="text-gray-400 hover:text-white transition-colors" aria-label="Facebook">
                 <FiFacebook size={20} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://twitter.com" className="text-gray-400 hover:text-white transition-colors" aria-label="Twitter">
                 <FiTwitter size={20} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://instagram.com" className="text-gray-400 hover:text-white transition-colors" aria-label="Instagram">
                 <FiInstagram size={20} />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://linkedin.com" className="text-gray-400 hover:text-white transition-colors" aria-label="LinkedIn">
                 <FiLinkedin size={20} />
               </a>
             </div>
@@ -115,15 +115,32 @@ const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-start space-x-3">
                 <FiMapPin className="text-primary mt-1 flex-shrink-0" />
-                <span className="text-gray-400">Juja, Kiambu</span>
+                <a 
+                  href="https://maps.google.com/?q=Juja,Kiambu" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Juja, Kiambu
+                </a>
               </li>
               <li className="flex items-center space-x-3">
                 <FiPhone className="text-primary flex-shrink-0" />
-                <span className="text-gray-400">+254-700-071-699</span>
+                <a 
+                  href="tel:+254700071699" 
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  +254-700-071-699
+                </a>
               </li>
               <li className="flex items-center space-x-3">
                 <FiMail className="text-primary flex-shrink-0" />
-                <span className="text-gray-400">info@laundrybasket.com</span>
+                <a 
+                  href="mailto:info@laundrybasket.com" 
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  info@laundrybasket.com
+                </a>
               </li>
               <li className="flex items-start space-x-3">
                 <FiClock className="text-primary mt-1 flex-shrink-0" />

@@ -4,7 +4,7 @@ import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import Footer from '@/components/layout/Footer';
-
+import { Toaster } from 'sonner'
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -23,6 +23,7 @@ export default function RootLayout({
         <Navbar />
         <Sidebar />
         <main>{children}</main>
+        <Toaster />
         <Footer />
       </body>
     </html>

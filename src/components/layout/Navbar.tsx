@@ -21,8 +21,8 @@ const Navbar = () => {
           <Image
             src="/images/favicon.ico"
             alt="Laundry Basket Logo"
-            width={20}
-            height={20}
+            width={10}
+            height={10}
             className="w-auto h-auto round-md"
           />
           <span className="text-2xl font-bold text-primary">Laundry Basket</span>
@@ -30,19 +30,19 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
-          <Link href="/" className="text-foreground hover:text-primary transition-colors">
+          <Link href="/" className="text-foreground hover:text-blue-800 transition-colors">
             Home
           </Link>
-          <Link href="/about" className="text-foreground hover:text-primary transition-colors">
+          <Link href="/about" className="text-foreground hover:text-blue-800 transition-colors">
             About
           </Link>
-          <Link href="/services" className="text-foreground hover:text-primary transition-colors">
+          <Link href="/services" className="text-foreground hover:text-blue-800 transition-colors">
             Services
           </Link>
-          <Link href="/pricing" className="text-foreground hover:text-primary transition-colors">
+          <Link href="/pricing" className="text-foreground hover:text-blue-800 transition-colors">
             Pricing
           </Link>
-          <Link href="/contact" className="text-foreground hover:text-primary transition-colors">
+          <Link href="/contact" className="text-foreground hover:text-blue-800 transition-colors">
             Contact
           </Link>
         </nav>
@@ -72,19 +72,19 @@ const Navbar = () => {
           className="md:hidden bg-white py-4 shadow-md"
         >
           <div className="container flex flex-col space-y-4">
-            <Link href="/" className="text-foreground hover:text-primary transition-colors" onClick={toggleMenu}>
+            <Link href="/" className="text-foreground hover:text-blue-800 transition-colors" onClick={toggleMenu}>
               Home
             </Link>
-            <Link href="/about" className="text-foreground hover:text-primary transition-colors" onClick={toggleMenu}>
+            <Link href="/about" className="text-foreground hover:text-blue-800 transition-colors" onClick={toggleMenu}>
               About
             </Link>
-            <Link href="/services" className="text-foreground hover:text-primary transition-colors" onClick={toggleMenu}>
+            <Link href="/services" className="text-foreground hover:text-blue-800 transition-colors" onClick={toggleMenu}>
               Services
             </Link>
-            <Link href="/pricing" className="text-foreground hover:text-primary transition-colors" onClick={toggleMenu}>
+            <Link href="/pricing" className="text-foreground hover:text-blue-800 transition-colors" onClick={toggleMenu}>
               Pricing
             </Link>
-            <Link href="/contact" className="text-foreground hover:text-primary transition-colors" onClick={toggleMenu}>
+            <Link href="/contact" className="text-foreground hover:text-blue-800 transition-colors" onClick={toggleMenu}>
               Contact
             </Link>
 

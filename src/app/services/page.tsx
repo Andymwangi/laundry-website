@@ -1,8 +1,10 @@
+'use client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Separator } from '@/components/ui/separator'
+import { ContactFormDialog } from '@/components/ui/contact-form'
 
 const services = [
   {
@@ -73,12 +75,14 @@ export default function ServicesPage() {
       <div className="grid gap-8 md:gap-12">
         {services.map((service, index) => (
           <Card key={service.id} className={`overflow-hidden ${index % 2 ? 'md:flex-row-reverse' : ''} md:flex`}>
-            <div className="md:w-1/3 relative h-64 md:h-auto">
+            <div className="md:w-1/3 relative h-64 md:h-auto min-h-[250px] flex-shrink-0">
               <Image 
                 src={service.image} 
                 alt={service.title} 
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 100vw, 33vw"
+                priority={index < 2} // Load first two images with priority
               />
             </div>
             <div className="md:w-2/3">
@@ -116,9 +120,7 @@ export default function ServicesPage() {
               <p className="mb-4">
                 Tailored services for businesses including hotels, restaurants, spas, and healthcare facilities. We offer bulk processing with consistent quality and reliable delivery schedules.
               </p>
-              <Button variant="outline" asChild>
-                <Link href="/contact">Request Quote</Link>
-              </Button>
+              <ContactFormDialog />
             </CardContent>
           </Card>
           <Card>
@@ -130,7 +132,7 @@ export default function ServicesPage() {
                 Weekly or monthly laundry plans at discounted rates. Perfect for busy professionals and families who want to save time and enjoy the convenience of regular laundry service.
               </p>
               <Button variant="outline" asChild>
-                <Link href="/pricing">View Plans</Link>
+                <Link href="/services">View Plans</Link>
               </Button>
             </CardContent>
           </Card>

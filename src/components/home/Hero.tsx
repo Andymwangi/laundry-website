@@ -1,5 +1,6 @@
 'use client';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -26,12 +27,16 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 pt-2">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
-              Get Started <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="lg" className="border-blue-600 text-blue-600 hover:bg-blue-50">
-              View Services
-            </Button>
+            <Link href="/pricing">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
+                Get Started <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/service">
+              <Button variant="outline" size="lg" className="border-blue-600 text-blue-600 hover:bg-blue-50">
+                View Services
+              </Button>
+            </Link>
           </div>
           
           <div className="flex items-center gap-2 mt-6">

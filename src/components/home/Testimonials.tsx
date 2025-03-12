@@ -9,18 +9,19 @@ import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 const testimonials = [
   {
     id: 1,
-    name: "Michael Ochieng",
-    role: "Business Owner",
+    name: "Sarah Wambui",
+    role: "Regular Customer",
     image: "/images/testimonials/client2.jpg",
-    content: "As a restaurant owner, I need reliable linen service. Laundry Basket has been our partner for over three years, and they've never let us down. Their attention to detail and consistent quality keeps our tablecloths and napkins looking pristine. Their business services are truly top-notch."
+    content: "Laundry Basket has completely transformed my weekly routine. Their wash and fold service is impeccable, and I'm always impressed by how fresh my clothes smell and how neatly they're folded. The convenience of their pickup and delivery service has saved me countless hours."
   },
   {
     id: 2,
-    name: "Sarah Wambui",
-    role: "Regular Customer",
+    name: "Michael Ochieng",
+    role: "Business Owner",
     image: "/images/testimonials/client1.jpg",
-    content: "Laundry Basket has completely transformed my weekly routine. Their wash and fold service is impeccable, and I'm always impressed by how fresh my clothes smell and how neatly they're folded. The convenience of their pickup and delivery service has saved me countless hours."
+    content: "As a restaurant owner, I need reliable linen service. Laundry Basket has been our partner for over three years, and they've never let us down. Their attention to detail and consistent quality keeps our tablecloths and napkins looking pristine. Their business services are truly top-notch."
   },
+ 
   {
     id: 3,
     name: "Emma Mbaya",
