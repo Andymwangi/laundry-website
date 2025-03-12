@@ -13,8 +13,8 @@ const Footer = () => {
               <Image 
                 src="/images/favicon.ico" 
                 alt="Laundry Basket" 
-                width={30} 
-                height={30} 
+                width={20} 
+                height={20} 
                 className="w-auto h-auto round-md"
               />
               <span className="text-xl font-bold">Laundry Basket</span>

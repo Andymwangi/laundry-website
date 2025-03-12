@@ -10,7 +10,7 @@ const pricingPlans = [
   {
     name: 'Basic Wash',
     price: 'Kes 50',
-    unit: 'per Kilo',
+    unit: 'per Kilogram',
     description: 'Perfect for everyday laundry needs with quick turnaround',
     features: [
       'Wash & Fold Service',
@@ -25,8 +25,8 @@ const pricingPlans = [
   },
   {
     name: 'Premium Service',
-    price: 'KES 70',
-    unit: 'per Kilo',
+    price: 'KES 80',
+    unit: 'per Kilogram',
     description: 'Enhanced service with premium care for your garments',
     features: [
       'Wash & Fold Service',

@@ -10,7 +10,7 @@ const comparisonData = {
     { 
       name: 'Regular Laundry', 
       availability: [true, true, true],
-      pricing: ['KES 50/Kg', 'KES 70/lb', 'Included (up to 30 Kilos)']
+      pricing: ['KES 50/Kg', 'KES 80/kg', 'Included (up to 30 Kilos)']
     },
     { 
       name: 'Dry Cleaning', 

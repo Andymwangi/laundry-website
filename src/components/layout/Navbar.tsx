@@ -21,8 +21,8 @@ const Navbar = () => {
           <Image
             src="/images/favicon.ico"
             alt="Laundry Basket Logo"
-            width={30}
-            height={30}
+            width={20}
+            height={20}
             className="w-auto h-auto round-md"
           />
           <span className="text-2xl font-bold text-primary">Laundry Basket</span>
