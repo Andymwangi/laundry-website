@@ -1,0 +1,237 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Basic styling without Tailwind utility classes */
+@layer base {
+  body {
+    background-color: white;
+    color: #1f2937;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    letter-spacing: -0.025em;
+    color: #1e3a8a;
+  }
+  
+  h1 {
+    font-size: 2.25rem;
+  }
+  @media (min-width: 768px) {
+    h1 {
+      font-size: 3rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    h1 {
+      font-size: 3.75rem;
+    }
+  }
+  
+  h2 {
+    font-size: 1.875rem;
+  }
+  @media (min-width: 768px) {
+    h2 {
+      font-size: 2.25rem;
+    }
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    h3 {
+      font-size: 1.875rem;
+    }
+  }
+  
+  h4 {
+    font-size: 1.25rem;
+  }
+  
+  p {
+    line-height: 1.75rem;
+  }
+  
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 80rem;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    background-color: #1e3a8a;
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition-property: background-color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  .btn-primary:hover {
+    background-color: #172554;
+  }
+  
+  .btn-secondary {
+    background-color: #ffc107;
+    color: #1e3a8a;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition-property: opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  .btn-secondary:hover {
+    opacity: 0.9;
+  }
+  
+  .btn-outline {
+    border: 1px solid #1e3a8a;
+    color: #1e3a8a;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition-property: background-color, color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  .btn-outline:hover {
+    background-color: #1e3a8a;
+    color: white;
+  }
+  
+  .btn-accent {
+    background-color: #ffc107;
+    color: #1e3a8a;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition-property: opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  .btn-accent:hover {
+    opacity: 0.9;
+  }
+  
+  .section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  @media (min-width: 768px) {
+    .section {
+      padding-top: 6rem;
+      padding-bottom: 6rem;
+    }
+  }
+  
+  .card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    border-top: 4px solid #ffc107;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+  }
+  .input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #1e3a8a;
+    border-color: transparent;
+  }
+  
+  .badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+  }
+  
+  .badge-primary {
+    background-color: #1e3a8a;
+    color: white;
+  }
+  
+  .badge-secondary {
+    background-color: #ffc107;
+    color: #1e3a8a;
+  }
+  
+  .animate-fade-in {
+    opacity: 0;
+    animation: fade-in 0.5s ease-in-out forwards;
+  }
+  
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slide-in {
+    opacity: 0;
+    animation: slide-in 0.5s ease-in-out forwards;
+  }
+  
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  .hover-scale {
+    transition-property: transform;
+    transition-duration: 300ms;
+  }
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+  
+  .accent-border {
+    border-left: 4px solid #ffc107;
+    padding-left: 1rem;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e3a8a;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ffc107;
+}
