@@ -79,6 +79,9 @@ const PricingPage = () => {
     }
   ];
 
+  // Find the plan with the most features to standardize heights
+  const maxFeatures = Math.max(...pricingPlans.map(plan => plan.features.length));
+
   return (
     <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
       {/* Hero Section */}
@@ -236,14 +239,14 @@ const PricingPage = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className={`rounded-lg overflow-hidden shadow-lg bg-white ${
                   plan.highlight ? 'ring-2 ring-blue-500 relative' : ''
-                }`}
+                } flex flex-col h-full`}
               >
                 {plan.highlight && (
                   <div className="bg-blue-500 text-white text-xs font-semibold py-1 text-center">
                     MOST POPULAR
                   </div>
                 )}
-                <div className="p-6">
+                <div className="p-6 flex-grow">
                   <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
                   <div className="mt-4 flex items-baseline">
                     <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
@@ -259,14 +262,23 @@ const PricingPage = () => {
                           <span className="text-gray-600">{feature}</span>
                         </li>
                       ))}
+                      {/* Add empty list items to standardize height */}
+                      {[...Array(maxFeatures - plan.features.length)].map((_, i) => (
+                        <li key={`empty-${i}`} className="invisible flex items-start">
+                          <Check className="h-5 w-5 mr-2 flex-shrink-0" />
+                          <span>Placeholder</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>
-                <div className="p-6 bg-gray-50 border-t border-gray-100">
-                  <Link href={plan.href}>
+                <div className="p-6 mt-auto">
+                  <Link href={plan.href} className="block w-full">
                     <Button
-                      className={`w-full ${
-                        plan.highlight ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'
+                      className={`w-full text-white font-medium py-3 ${
+                        plan.highlight 
+                          ? 'bg-blue-600 hover:bg-blue-700' 
+                          : 'bg-blue-500 hover:bg-blue-600'
                       }`}
                       size="lg"
                     >
@@ -276,46 +288,6 @@ const PricingPage = () => {
                 </div>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section - Optional */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">Frequently Asked Questions</h2>
-            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-              Have questions about our pricing? Find answers to common inquiries below.
-            </p>
-          </div>
-
-          <div className="max-w-3xl mx-auto space-y-6">
-            {/* FAQ items would go here */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900">How is the weight of my laundry determined?</h3>
-              <p className="mt-2 text-gray-600">
-                We weigh all laundry when it arrives at our facility using calibrated industrial scales.
-                You'll only be charged for the actual weight of your dry items.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900">Is there a minimum order requirement?</h3>
-              <p className="mt-2 text-gray-600">
-                For basic and premium wash services, there's a 2kg minimum order. Free pickup is available for orders of 5kg or more.
-                Subscription users have no minimum per pickup, with scheduled weekly service.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900">How does the monthly subscription work?</h3>
-              <p className="mt-2 text-gray-600">
-                Our monthly subscription covers up to 100kg of laundry per month, with weekly scheduled pickups.
-                You can choose between basic or premium washing for each batch at no extra cost.
-                Any usage beyond 100kg will be charged at the premium rate.
-              </p>
-            </div>
           </div>
         </div>
       </section>
