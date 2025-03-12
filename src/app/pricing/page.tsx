@@ -1,6 +1,5 @@
 import React from 'react';
 import { Metadata } from 'next';
-import PricingHero from '@/components/pricing/PricingHero';
 import PricingTiers from '@/components/pricing/PricingTiers';
 import PricingFAQ from '@/components/pricing/PricingFAQ';
 import ServiceComparison from '@/components/pricing/ServiceComparison';
@@ -14,7 +13,6 @@ export const metadata: Metadata = {
 export default function PricingPage() {
   return (
     <main className="min-h-screen">
-      <PricingHero />
       <PricingTiers />
       <ServiceComparison />
       <PricingFAQ />

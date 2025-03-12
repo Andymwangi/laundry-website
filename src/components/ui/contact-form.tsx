@@ -93,7 +93,7 @@ export function ContactFormDialog() {
       <DialogTrigger asChild>
         <Button variant="outline">Request Quote</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] bg-white border shadow-lg">
         <DialogHeader>
           <DialogTitle>Request a Quote</DialogTitle>
           <DialogDescription>
@@ -110,7 +110,7 @@ export function ContactFormDialog() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your name" {...field} />
+                    <Input placeholder="Your name" {...field} className="bg-white" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -124,7 +124,7 @@ export function ContactFormDialog() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="your.email@example.com" {...field} />
+                    <Input placeholder="your.email@example.com" {...field} className="bg-white" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -138,7 +138,7 @@ export function ContactFormDialog() {
                 <FormItem>
                   <FormLabel>Phone (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your phone number" {...field} />
+                    <Input placeholder="Your phone number" {...field} className="bg-white" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -152,7 +152,7 @@ export function ContactFormDialog() {
                 <FormItem>
                   <FormLabel>Company (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your company name" {...field} />
+                    <Input placeholder="Your company name" {...field} className="bg-white" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -168,7 +168,7 @@ export function ContactFormDialog() {
                   <FormControl>
                     <Textarea 
                       placeholder="Tell us about your laundry needs..." 
-                      className="min-h-[120px]"
+                      className="min-h-[120px] bg-white"
                       {...field} 
                     />
                   </FormControl>
