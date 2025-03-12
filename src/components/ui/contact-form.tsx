@@ -58,10 +58,10 @@ export function ContactFormDialog() {
     setIsSubmitting(true)
     
     try {
-      // Replace with your EmailJS service ID, template ID, and public key
+      // Using environment variables instead of hardcoded values
       const result = await emailjs.send(
-        'service_ixvw5cw',
-        'template_neopl7f',
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '',
+        process.env.NEXT_PUBLIC_EMAILJS_QUOTE_ID || '',
         {
           from_name: data.name,
           from_email: data.email,
@@ -69,7 +69,7 @@ export function ContactFormDialog() {
           message: data.message,
           company: data.company || 'Not provided',
         },
-        '-WjzwI0_0ejVOmwI2WRL_'
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || ''
       )
       
       toast.success("Request Submitted", {

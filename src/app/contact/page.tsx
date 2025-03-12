@@ -20,11 +20,11 @@ export default function ContactPage() {
 
     // Access environment variables with type checking
     const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
-    const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+    const formId = process.env.NEXT_PUBLIC_EMAILJS_FORM_ID;
     const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
 
     // Validate that all required values are present
-    if (!serviceId || !templateId || !publicKey || !formRef.current) {
+    if (!serviceId || !formId || !publicKey || !formRef.current) {
       console.error('Missing EmailJS configuration or form reference');
       toast.error('Email service is not properly configured. Please contact the administrator.');
       setIsSubmitting(false);
@@ -32,7 +32,7 @@ export default function ContactPage() {
     }
 
     // Now TypeScript knows these are strings and the form is defined
-    emailjs.sendForm(serviceId, templateId, formRef.current, publicKey)
+    emailjs.sendForm(serviceId, formId, formRef.current, publicKey)
       .then((result) => {
         console.log('Email sent successfully:', result.text);
         formRef.current?.reset();
