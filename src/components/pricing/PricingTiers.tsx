@@ -5,15 +5,25 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle, X } from 'lucide-react';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export default function PricingPage() {
   const router = useRouter();
   const [isMonthly, setIsMonthly] = useState(true);
+  const { user, loading } = useAuth();
   
   // Handle selection of a pricing plan
   const handleSelectPlan = (plan: string, defaultKilos = 1) => {
+    if (!user && !loading) {
+      // Store plan selection to localStorage
+      localStorage.setItem('selectedPlan', plan);
+      localStorage.setItem('defaultKilos', defaultKilos.toString());
+      router.push('/login');
+      return;
+    }
+    
     // Navigate to order page with plan parameters
-    router.push(`/order?plan=${plan}${plan !== 'subscription' ? `&kilos=${defaultKilos}` : ''}`);
+    router.push(`/dashboard/order?plan=${plan}${plan !== 'subscription' ? `&kilos=${defaultKilos}` : ''}`);
   };
   
   return (
@@ -207,34 +217,6 @@ export default function PricingPage() {
             </Button>
           </CardFooter>
         </Card>
-      </div>
-      
-      <div className="max-w-3xl mx-auto mt-16 text-center">
-        <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
-        
-        <div className="text-left space-y-6">
-          <div>
-            <h3 className="text-lg font-medium mb-2">How does the pricing work?</h3>
-            <p className="text-gray-600">
-              Our basic and premium plans are priced per kilogram. We'll weigh your laundry at pickup and calculate the price accordingly. 
-              For subscriptions, you pay a fixed monthly fee for up to 20kg of laundry per month.
-            </p>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-medium mb-2">What is the minimum order?</h3>
-            <p className="text-gray-600">
-              There's no minimum order weight, but pickup is free for orders of 5kg or more on the Basic plan. Premium and Subscription plans include free pickup regardless of weight.
-            </p>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-medium mb-2">Can I change my plan later?</h3>
-            <p className="text-gray-600">
-              Yes, you can switch between plans at any time. Subscription plans can be upgraded, downgraded, or canceled with 7 days' notice.
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );

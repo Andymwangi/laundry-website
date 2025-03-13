@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { verify } from 'jsonwebtoken';
 import { db } from '@/lib/db';
-import { users } from '@/lib/db/schema';
+import { users, profiles } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 const secretKey = process.env.JWT_SECRET || 'your-secret-key';
@@ -21,6 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const decoded = verify(token, secretKey) as { userId: number };
     const userId = decoded.userId;
     
+    // Get user data
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),
     });
@@ -29,11 +30,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'User not found' });
     }
     
+    // Get profile data
+    const profile = await db.query.profiles.findFirst({
+      where: eq(profiles.userId, userId),
+    });
+    
+    // Return the user and profile data (if it exists)
     return res.status(200).json({
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
+        profile: profile || undefined
       },
     });
   } catch (error) {
