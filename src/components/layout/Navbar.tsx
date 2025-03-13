@@ -49,10 +49,10 @@ const Navbar = () => {
 
         {/* Action Buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link href="/login">
+          <Link href="/auth/login">
             <Button variant="outline">Login</Button>
           </Link>
-          <Link href="/signup">
+          <Link href="/auth/signup">
             <Button>Sign Up</Button>
           </Link>
         </div>
@@ -100,7 +100,7 @@ const Navbar = () => {
             <div className="pt-4 border-t border-gray-200">
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <FiPhone size={16} />
-                <span>=254-700-071-699</span>
+                <span>+254-700-071-699</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-2">
                 <FiMail size={16} />
