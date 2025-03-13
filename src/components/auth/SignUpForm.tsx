@@ -1,16 +1,16 @@
-'use client'
+"use client"
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createUser } from "@/lib/auth";
+import { signUp } from "@/lib/auth/client";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -39,24 +39,26 @@ export function SignupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await createUser({
+      const result = await signUp({
         name: values.name,
         email: values.email,
         password: values.password,
       });
       
-      toast.success("Account created successfully!", {
-        description: "Please log in with your new account.",
-        action: {
-          label: "Login",
-          onClick: () => router.push("/auth/login"),
-        },
-      });
-      
-      router.push("/auth/login");
+      if (result.success) {
+        toast.success("Account created successfully!", {
+          description: "Please log in with your new account.",
+        });
+        
+        router.push("/auth/login");
+      } else {
+        toast.error("Registration failed", {
+          description: result.error || "This email may already be in use.",
+        });
+      }
     } catch (error) {
       toast.error("Registration failed", {
-        description: "This email may already be in use.",
+        description: "An unexpected error occurred.",
       });
     } finally {
       setIsLoading(false);
@@ -180,10 +182,7 @@ export function SignupForm() {
             onClick={() => {
               setIsLoading(true);
               // Placeholder for Google OAuth
-              setTimeout(() => {
-                setIsLoading(false);
-                toast.info("Google integration coming soon");
-              }, 1000);
+              setTimeout(() => setIsLoading(false), 1000);
             }}
             disabled={isLoading}
           >
