@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CalendarClock, Truck, Info, ArrowRight, Check } from 'lucide-react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 // Mock order status badges
 const getStatusBadge = (status: string) => {
@@ -70,12 +71,18 @@ const OrderStatusProgress = ({ status }: { status: string }) => {
   );
 };
 
-export default function OrdersPage() {
-  const searchParams = useSearchParams();
+// Client Component that uses useSearchParams
+function OrdersContent() {
+  const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   
+  // Get search params on the client side
   useEffect(() => {
-    if (searchParams.get('success') === 'true') {
+    setSearchParams(new URLSearchParams(window.location.search));
+  }, []);
+
+  useEffect(() => {
+    if (searchParams && searchParams.get('success') === 'true') {
       setShowSuccess(true);
       const timer = setTimeout(() => {
         setShowSuccess(false);
@@ -359,5 +366,77 @@ export default function OrdersPage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function OrdersLoading() {
+  return (
+    <div className="container mx-auto py-10 px-4 md:px-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="h-10 bg-gray-200 rounded animate-pulse w-1/4 mb-6" />
+        
+        <div className="mb-6 flex justify-between items-center">
+          <div className="h-6 bg-gray-200 rounded animate-pulse w-1/3" />
+          <div className="h-10 bg-gray-200 rounded animate-pulse w-1/4" />
+        </div>
+        
+        <div className="border rounded-lg overflow-hidden mb-6">
+          <div className="grid grid-cols-3 gap-1 p-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-10 bg-gray-200 rounded animate-pulse" />
+            ))}
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="border rounded-lg overflow-hidden">
+              <div className="p-4 border-b">
+                <div className="flex justify-between items-center">
+                  <div className="h-6 bg-gray-200 rounded animate-pulse w-1/4" />
+                  <div className="h-6 bg-gray-200 rounded animate-pulse w-1/6" />
+                </div>
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-1/5 mt-2" />
+              </div>
+              
+              <div className="p-4 space-y-4">
+                <div className="w-full space-y-2 my-4">
+                  <div className="flex justify-between">
+                    {[...Array(7)].map((_, j) => (
+                      <div key={j} className="h-2 w-2 bg-gray-200 rounded-full" />
+                    ))}
+                  </div>
+                  <div className="h-1.5 bg-gray-200 rounded-full w-full" />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  {[...Array(2)].map((_, j) => (
+                    <div key={j}>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2 mb-1" />
+                      <div className="h-5 bg-gray-200 rounded animate-pulse w-2/3" />
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <div className="h-8 bg-gray-200 rounded animate-pulse w-1/4" />
+                  <div className="h-8 bg-gray-200 rounded animate-pulse w-1/4" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={<OrdersLoading />}>
+      <OrdersContent />
+    </Suspense>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,8 @@ import { Separator } from '@/components/ui/separator';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function CheckoutPage() {
+// Create a client component that uses the hooks
+function CheckoutForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -250,5 +252,29 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading component for Suspense fallback
+function CheckoutLoading() {
+  return (
+    <div className="container mx-auto py-10 px-4 md:px-6">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6">Complete Your Order</h1>
+        <div className="animate-pulse space-y-6">
+          <div className="h-48 bg-gray-200 rounded"></div>
+          <div className="h-96 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<CheckoutLoading />}>
+      <CheckoutForm />
+    </Suspense>
   );
 }
