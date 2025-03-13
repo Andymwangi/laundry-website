@@ -1,298 +1,241 @@
 'use client';
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Check } from 'lucide-react';
-import Link from 'next/link';
+import { Separator } from '@/components/ui/separator';
+import { CheckCircle, X } from 'lucide-react';
 
-const PricingPage = () => {
-  const [showCalculator, setShowCalculator] = useState(false);
-  const [kilos, setKilos] = useState(1);
-  const [serviceType, setServiceType] = useState('basic');
-  const [total, setTotal] = useState<number | null>(null);
-
-  const calculateCost = () => {
-    let cost = 0;
-    
-    if (serviceType === 'basic') {
-      cost = kilos * 50; // KES 50 per kilo for basic wash
-    } else if (serviceType === 'premium') {
-      cost = kilos * 80; // KES 80 per kilo for premium wash
-    } else if (serviceType === 'subscription') {
-      cost = 6000; // KES 6000 for monthly subscription
-    }
-    
-    setTotal(cost);
+export default function PricingPage() {
+  const router = useRouter();
+  const [isMonthly, setIsMonthly] = useState(true);
+  
+  // Handle selection of a pricing plan
+  const handleSelectPlan = (plan: string, defaultKilos = 1) => {
+    // Navigate to order page with plan parameters
+    router.push(`/order?plan=${plan}${plan !== 'subscription' ? `&kilos=${defaultKilos}` : ''}`);
   };
-
-  // Pricing plans data
-  const pricingPlans = [
-    {
-      name: "Basic Wash",
-      price: "KES 50",
-      unit: "per kilo",
-      description: "Perfect for everyday laundry needs",
-      features: [
-        "Regular detergent",
-        "Standard washing cycle",
-        "Air drying option available",
-        "48-hour turnaround",
-        "Free pickup for 5kg or more"
-      ],
-      highlight: false,
-      ctaText: "Choose Basic",
-      href: "/checkout?plan=basic"
-    },
-    {
-      name: "Premium Wash",
-      price: "KES 80",
-      unit: "per kilo",
-      description: "Enhanced care for your favorite clothes",
-      features: [
-        "Premium eco-friendly detergent",
-        "Delicate washing cycle",
-        "Fabric softener included",
-        "24-hour turnaround",
-        "Free pickup and delivery",
-        "Stain treatment included"
-      ],
-      highlight: true,
-      ctaText: "Choose Premium",
-      href: "/checkout?plan=premium"
-    },
-    {
-      name: "Monthly Subscription",
-      price: "KES 6,000",
-      unit: "per month",
-      description: "Unlimited laundry service for heavy users",
-      features: [
-        "Up to 100kg of laundry monthly",
-        "Premium or basic washing options",
-        "Scheduled weekly pickups",
-        "Priority processing",
-        "Dedicated account manager",
-        "WhatsApp notifications"
-      ],
-      highlight: false,
-      ctaText: "Subscribe Monthly",
-      href: "/checkout?plan=subscription"
-    }
-  ];
-
-  // Find the plan with the most features to standardize heights
-  const maxFeatures = Math.max(...pricingPlans.map(plan => plan.features.length));
-
+  
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+    <div className="container mx-auto py-16 px-4 md:px-6">
+      <div className="max-w-5xl mx-auto text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">Simple, Transparent Pricing</h1>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          Choose the plan that fits your laundry needs. No hidden fees, just clean clothes delivered to your door.
+        </p>
+        
+        <div className="flex items-center justify-center mt-8 mb-12">
+          <div className="bg-gray-100 p-1 rounded-full inline-flex">
+            <button
+              className={`px-6 py-2 rounded-full text-sm font-medium ${
+                isMonthly ? 'bg-white shadow-sm' : 'text-gray-700'
+              }`}
+              onClick={() => setIsMonthly(true)}
             >
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Simple, Transparent Pricing
-              </h1>
-              <p className="text-xl text-gray-600 mb-8 mx-auto max-w-2xl">
-                At Laundry Basket, we believe in honest pricing with no hidden fees. Choose the plan that works best for your laundry needs.
-              </p>
-              <div className="flex justify-center gap-4 flex-wrap">
-                <Button 
-                  size="lg" 
-                  className="bg-blue-600 hover:bg-blue-700"
-                  onClick={() => {
-                    const plansSection = document.getElementById('pricing-plans');
-                    plansSection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  View Plans
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-blue-600 text-blue-600 hover:bg-blue-50"
-                  onClick={() => setShowCalculator(!showCalculator)}
-                >
-                  Calculate Cost <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </motion.div>
-
-            {showCalculator && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mt-8 bg-white p-6 rounded-lg shadow-md max-w-md mx-auto"
-              >
-                <h3 className="text-xl font-semibold mb-4">Cost Calculator</h3>
-                
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">Service Type</label>
-                  <div className="flex gap-2 mb-4 flex-wrap">
-                    <Button 
-                      variant={serviceType === 'basic' ? 'default' : 'outline'} 
-                      className={serviceType === 'basic' ? 'bg-blue-600' : ''}
-                      onClick={() => setServiceType('basic')}
-                    >
-                      Basic Wash
-                    </Button>
-                    <Button 
-                      variant={serviceType === 'premium' ? 'default' : 'outline'} 
-                      className={serviceType === 'premium' ? 'bg-blue-600' : ''}
-                      onClick={() => setServiceType('premium')}
-                    >
-                      Premium Wash
-                    </Button>
-                    <Button 
-                      variant={serviceType === 'subscription' ? 'default' : 'outline'} 
-                      className={serviceType === 'subscription' ? 'bg-blue-600' : ''}
-                      onClick={() => setServiceType('subscription')}
-                    >
-                      Monthly
-                    </Button>
-                  </div>
-                </div>
-                
-                {serviceType !== 'subscription' && (
-                  <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-medium mb-2">
-                      Weight (Kilos)
-                    </label>
-                    <div className="flex items-center">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setKilos(Math.max(1, kilos - 1))}
-                      >
-                        -
-                      </Button>
-                      <span className="mx-4 text-lg font-medium">{kilos}</span>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setKilos(kilos + 1)}
-                      >
-                        +
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                
-                <Button 
-                  className="w-full bg-blue-600 mt-2" 
-                  onClick={calculateCost}
-                >
-                  Calculate
-                </Button>
-                
-                {total !== null && (
-                  <div className="mt-4 p-4 bg-blue-50 rounded-md">
-                    <p className="text-sm text-gray-600">Estimated Cost:</p>
-                    <p className="text-2xl font-bold text-blue-800">KES {total.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {serviceType === 'basic' ? 'Basic Wash - KES 50 per kilo' : 
-                       serviceType === 'premium' ? 'Premium Wash - KES 80 per kilo' : 
-                       'Monthly Subscription - KES 6,000 fixed'}
-                    </p>
-                    
-                    <Link 
-                      href={`/checkout?plan=${serviceType}${serviceType !== 'subscription' ? `&kilos=${kilos}` : ''}`}
-                      className="block mt-4"
-                    >
-                      <Button className="w-full bg-blue-600">
-                        Proceed to Checkout
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </motion.div>
-            )}
+              Pay Per Use
+            </button>
+            <button
+              className={`px-6 py-2 rounded-full text-sm font-medium ${
+                !isMonthly ? 'bg-white shadow-sm' : 'text-gray-700'
+              }`}
+              onClick={() => setIsMonthly(false)}
+            >
+              Subscription
+            </button>
           </div>
         </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Basic Plan */}
+        <Card className="relative overflow-hidden">
+          <CardHeader>
+            <CardTitle>Basic Wash</CardTitle>
+            <CardDescription>Perfect for everyday laundry needs</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="text-center">
+              <span className="text-3xl font-bold">KES 50</span>
+              <span className="text-gray-500"> / kg</span>
+            </div>
+            
+            <Separator />
+            
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>Standard washing and drying</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>Eco-friendly detergents</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>48-hour turnaround</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>Free pickup for 5kg+</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <X className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                <span className="text-gray-500">Stain treatment</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <X className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                <span className="text-gray-500">Premium fabric softener</span>
+              </li>
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              className="w-full"
+              variant="outline"
+              onClick={() => handleSelectPlan('basic', 3)}
+            >
+              Get Started
+            </Button>
+          </CardFooter>
+        </Card>
         
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-          <div className="absolute top-0 right-0 bg-blue-200 opacity-20 rounded-full w-96 h-96 -mt-20 -mr-20"></div>
-          <div className="absolute bottom-0 left-0 bg-yellow-200 opacity-20 rounded-full w-64 h-64 -mb-10 -ml-10"></div>
-        </div>
-      </section>
-
-      {/* Pricing Plans Section */}
-      <section id="pricing-plans" className="py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900">Choose Your Plan</h2>
-            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-              Select the plan that fits your laundry needs. All plans include free pickup for orders above the minimum threshold.
+        {/* Premium Plan */}
+        <Card className="relative overflow-hidden border-blue-200 bg-blue-50">
+          <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1">
+            POPULAR
+          </div>
+          <CardHeader>
+            <CardTitle className="text-blue-700">Premium Wash</CardTitle>
+            <CardDescription>For those who demand the best</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="text-center">
+              <span className="text-3xl font-bold text-blue-700">KES 80</span>
+              <span className="text-gray-600"> / kg</span>
+            </div>
+            
+            <Separator className="bg-blue-200" />
+            
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span>Premium washing and drying</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span>Premium detergents</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span>Stain treatment included</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span>Free pickup for all orders</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span>Ironing service (shirts only)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span>24-hour turnaround</span>
+              </li>
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              className="w-full bg-blue-600 hover:bg-blue-700"
+              onClick={() => handleSelectPlan('premium', 3)}
+            >
+              Get Started
+            </Button>
+          </CardFooter>
+        </Card>
+        
+        {/* Subscription Plan */}
+        <Card className="relative overflow-hidden">
+          <CardHeader>
+            <CardTitle>Monthly Subscription</CardTitle>
+            <CardDescription>Hassle-free laundry all month</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="text-center">
+              <span className="text-3xl font-bold">KES {isMonthly ? '6,000' : '5,500'}</span>
+              <span className="text-gray-500"> / month</span>
+              {!isMonthly && (
+                <div className="text-sm text-green-600 font-medium mt-1">Save KES 6,000 yearly</div>
+              )}
+            </div>
+            
+            <Separator />
+            
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>Up to 20kg of laundry per month</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>Premium washing and drying</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>All premium services included</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>Priority scheduling</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>Free pickup and delivery</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <span>Roll over unused kilograms</span>
+              </li>
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              className="w-full"
+              variant="outline"
+              onClick={() => handleSelectPlan('subscription')}
+            >
+              Subscribe Now
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+      
+      <div className="max-w-3xl mx-auto mt-16 text-center">
+        <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
+        
+        <div className="text-left space-y-6">
+          <div>
+            <h3 className="text-lg font-medium mb-2">How does the pricing work?</h3>
+            <p className="text-gray-600">
+              Our basic and premium plans are priced per kilogram. We'll weigh your laundry at pickup and calculate the price accordingly. 
+              For subscriptions, you pay a fixed monthly fee for up to 20kg of laundry per month.
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {pricingPlans.map((plan, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`rounded-lg overflow-hidden shadow-lg bg-white ${
-                  plan.highlight ? 'ring-2 ring-blue-500 relative' : ''
-                } flex flex-col h-full`}
-              >
-                {plan.highlight && (
-                  <div className="bg-blue-500 text-white text-xs font-semibold py-1 text-center">
-                    MOST POPULAR
-                  </div>
-                )}
-                <div className="p-6 flex-grow">
-                  <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-                  <div className="mt-4 flex items-baseline">
-                    <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
-                    <span className="ml-2 text-gray-500">{plan.unit}</span>
-                  </div>
-                  <p className="mt-2 text-gray-600">{plan.description}</p>
-
-                  <div className="mt-6">
-                    <ul className="space-y-3">
-                      {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-start">
-                          <Check className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
-                          <span className="text-gray-600">{feature}</span>
-                        </li>
-                      ))}
-                      {/* Add empty list items to standardize height */}
-                      {[...Array(maxFeatures - plan.features.length)].map((_, i) => (
-                        <li key={`empty-${i}`} className="invisible flex items-start">
-                          <Check className="h-5 w-5 mr-2 flex-shrink-0" />
-                          <span>Placeholder</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-                <div className="p-6 mt-auto">
-                  <Link href={plan.href} className="block w-full">
-                    <Button
-                      className={`w-full text-white font-medium py-3 ${
-                        plan.highlight 
-                          ? 'bg-blue-600 hover:bg-blue-700' 
-                          : 'bg-blue-500 hover:bg-blue-600'
-                      }`}
-                      size="lg"
-                    >
-                      {plan.ctaText}
-                    </Button>
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
+          
+          <div>
+            <h3 className="text-lg font-medium mb-2">What is the minimum order?</h3>
+            <p className="text-gray-600">
+              There's no minimum order weight, but pickup is free for orders of 5kg or more on the Basic plan. Premium and Subscription plans include free pickup regardless of weight.
+            </p>
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-medium mb-2">Can I change my plan later?</h3>
+            <p className="text-gray-600">
+              Yes, you can switch between plans at any time. Subscription plans can be upgraded, downgraded, or canceled with 7 days' notice.
+            </p>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
-};
-
-export default PricingPage;
+}
