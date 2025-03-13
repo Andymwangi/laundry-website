@@ -89,10 +89,10 @@ const Navbar = () => {
             </Link>
 
             <div className="flex space-x-4 pt-2">
-              <Link href="/login" className="w-full">
+              <Link href="/auth/login" className="w-full">
                 <Button variant="outline" className="w-full" onClick={toggleMenu}>Login</Button>
               </Link>
-              <Link href="/signup" className="w-full">
+              <Link href="/auth/signup" className="w-full">
                 <Button className="w-full" onClick={toggleMenu}>Sign Up</Button>
               </Link>
             </div>
