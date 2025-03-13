@@ -18,7 +18,7 @@ export default function PricingPage() {
       // Store plan selection to localStorage
       localStorage.setItem('selectedPlan', plan);
       localStorage.setItem('defaultKilos', defaultKilos.toString());
-      router.push('/login');
+      router.push('/auth/login');
       return;
     }
     

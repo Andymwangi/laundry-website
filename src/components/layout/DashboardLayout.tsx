@@ -36,7 +36,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   // Redirect if not authenticated
   React.useEffect(() => {
     if (!loading && !user) {
-      router.push('/login');
+      router.push('/auth/login');
     }
   }, [loading, user, router]);
   
