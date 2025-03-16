@@ -24,7 +24,15 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     // The number of pages that should be kept in memory
     pagesBufferLength: 2,
-  }
+      // Ignore specific errors during build
+      // This is a bit of a hack and not officially supported
+      webpack(config, options) {
+        config.infrastructureLogging = {
+          ...config.infrastructureLogging,
+          level: 'error', // Only show errors, suppress warnings
+        };
+      }
+    }
 };
 
 module.exports = nextConfig;
