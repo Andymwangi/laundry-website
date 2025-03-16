@@ -26,13 +26,15 @@ const nextConfig = {
     pagesBufferLength: 2,
       // Ignore specific errors during build
       // This is a bit of a hack and not officially supported
-      webpack(config, options) {
-        config.infrastructureLogging = {
-          ...config.infrastructureLogging,
-          level: 'error', // Only show errors, suppress warnings
-        };
-      }
-    }
+    },
+    webpack: (config, { isServer }) => {
+      // This will reduce the verbosity of the build output
+      config.infrastructureLogging = {
+        level: 'error', // Only show errors, not warnings
+      };
+      
+      return config;
+    },
 };
 
 module.exports = nextConfig;
