@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,10 @@ interface Order {
   pickupDate: string;
   deliveryDate: string;
 }
-
+interface OrderCalculatorProps {
+  plan: ServicePlan;
+  onOrderPlaced: (order: Order) => void;
+}
 // Price configuration for different service plans
 const PRICE_CONFIG: Record<ServicePlan, number> = {
   basic: 50, // KES per kg
@@ -131,19 +134,15 @@ const OrderStatusProgress: React.FC<OrderStatusProgressProps> = ({ status }) => 
   );
 };
 
-interface OrderCalculatorProps {
-  plan: ServicePlan;
-  onOrderPlaced: (order: Order) => void;
-}
-
 // New Order Form Component with calculator
-const OrderCalculator: React.FC<OrderCalculatorProps> = ({ plan, onOrderPlaced }) => {
+// This needs to be wrapped in Suspense since it uses router
+const OrderCalculatorWithRouter: React.FC<OrderCalculatorProps> = ({ plan, onOrderPlaced }) => {
   const router = useRouter();
   const [kilos, setKilos] = useState(3);
   const [loading, setLoading] = useState(false);
   
   // Calculate price based on plan and kilos
-  const calculatePrice = (): number => {
+  const calculatePrice = () => {
     if (plan === 'subscription') {
       return PRICE_CONFIG.subscription;
     } else {
@@ -159,7 +158,7 @@ const OrderCalculator: React.FC<OrderCalculatorProps> = ({ plan, onOrderPlaced }
     setKilos(kilos + 1);
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setLoading(true);
     
@@ -273,15 +272,25 @@ const OrderCalculator: React.FC<OrderCalculatorProps> = ({ plan, onOrderPlaced }
   );
 };
 
+// Wrapper component with Suspense boundary
+const OrderCalculator: React.FC<OrderCalculatorProps> = ({ plan, onOrderPlaced }) => {
+  return (
+    <Suspense fallback={<div className="text-center py-4">Loading calculator...</div>}>
+      <OrderCalculatorWithRouter plan={plan} onOrderPlaced={onOrderPlaced} />
+    </Suspense>
+  );
+};
+
 // Main Orders Page Component
 export default function OrdersPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showOrderCalculator, setShowOrderCalculator] = useState(false);
+// Update the selectedPlan state declaration to properly type it as ServicePlan
   const [selectedPlan, setSelectedPlan] = useState<ServicePlan>('basic');
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
+  const [orders, setOrders] = useState(MOCK_ORDERS);
   
   // Format date helper function
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string | number | Date) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-GB', {
       day: 'numeric',
@@ -307,16 +316,16 @@ export default function OrdersPage() {
     setOrders(prevOrders => 
       prevOrders.map(order => 
         order.id === orderId 
-          ? { ...order, status: 'canceled' as OrderStatus } 
+          ? { ...order, status: 'canceled' } 
           : order
       )
     );
   };
   
   // Filter orders by status for tabs
-  const activeStatuses: OrderStatus[] = ['pending', 'pickup_scheduled', 'collected', 'processing', 'ready_for_delivery', 'delivery_scheduled'];
-  const completedStatuses: OrderStatus[] = ['delivered'];
-  const canceledStatuses: OrderStatus[] = ['canceled'];
+  const activeStatuses = ['pending', 'pickup_scheduled', 'collected', 'processing', 'ready_for_delivery', 'delivery_scheduled'];
+  const completedStatuses = ['delivered'];
+  const canceledStatuses = ['canceled'];
 
   const activeOrders = orders.filter(order => activeStatuses.includes(order.status));
   const completedOrders = orders.filter(order => completedStatuses.includes(order.status));

@@ -7,25 +7,12 @@ import { Separator } from '@/components/ui/separator';
 import { CheckCircle, Home, CalendarClock, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-// Client Component that uses useSearchParams
-function OrderConfirmationContent() {
-  const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
-  const [orderId, setOrderId] = useState('123456');
-  
-  // Get search params on the client side
-  useEffect(() => {
-    setSearchParams(new URLSearchParams(window.location.search));
-  }, []);
-
-  useEffect(() => {
-    if (searchParams) {
-      const id = searchParams.get('orderId');
-      if (id) {
-        setOrderId(id);
-      }
-    }
-  }, [searchParams]);
+// Client Component with proper searchParams handling
+function OrderDetails() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('orderId') || '123456';
   
   const [order, setOrder] = useState({
     id: orderId,
@@ -40,17 +27,14 @@ function OrderConfirmationContent() {
     transactionId: 'M-PESA' + Math.floor(Math.random() * 10000000),
   });
   
-  // Update order ID when it changes
+  // Update order when ID changes
   useEffect(() => {
     setOrder(prev => ({
       ...prev,
       id: orderId
     }));
-  }, [orderId]);
-  
-  // In a real app, fetch order details from your API
-  useEffect(() => {
-    // Simulate API call
+    
+    // In a real app, fetch order details from your API
     // const fetchOrder = async () => {
     //   const response = await fetch(`/api/orders/${orderId}`);
     //   const data = await response.json();
@@ -206,11 +190,16 @@ function OrderConfirmationLoading() {
   );
 }
 
-// Main component with Suspense boundary
-export default function OrderConfirmationPage() {
+// Client Component that handles the suspense boundary around search params
+function OrderConfirmationContent() {
   return (
     <Suspense fallback={<OrderConfirmationLoading />}>
-      <OrderConfirmationContent />
+      <OrderDetails />
     </Suspense>
   );
+}
+
+// Main component properly structured
+export default function OrderConfirmationPage() {
+  return <OrderConfirmationContent />;
 }

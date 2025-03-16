@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +25,29 @@ const formSchema = z.object({
 export function SignupForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+// First, update the state definition to properly type the values
+const [searchParamsData, setSearchParamsData] = useState<{
+  returnUrl: string | null;
+  plan: string | null;
+  kilos: string | null;
+}>({
+  returnUrl: null,
+  plan: null,
+  kilos: null
+});
+
+// Now the useEffect will work without type errors
+useEffect(() => {
+  // Only run in the browser environment
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    setSearchParamsData({
+      returnUrl: params.get('returnUrl'),
+      plan: params.get('plan'),
+      kilos: params.get('kilos')
+    });
+  }
+}, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,7 +73,14 @@ export function SignupForm() {
           description: "Please log in with your new account.",
         });
         
-        router.push("/auth/login");
+        // Redirect to login with the same query parameters
+        const queryParams = new URLSearchParams();
+        if (searchParamsData.plan) queryParams.set('plan', searchParamsData.plan);
+        if (searchParamsData.kilos) queryParams.set('kilos', searchParamsData.kilos);
+        if (searchParamsData.returnUrl) queryParams.set('returnUrl', searchParamsData.returnUrl);
+        
+        const queryString = queryParams.toString();
+        router.push(`/auth/login${queryString ? `?${queryString}` : ''}`);
       } else {
         toast.error("Registration failed", {
           description: result.error || "This email may already be in use.",
@@ -70,6 +100,11 @@ export function SignupForm() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Create your account</h2>
         <p className="text-gray-600">Join Laundry Basket to manage your laundry services</p>
+        {searchParamsData.plan && (
+          <div className="mt-3 p-3 bg-blue-50 text-blue-700 rounded-md">
+            <p>You'll complete your order after signup.</p>
+          </div>
+        )}
       </div>
       
       <Form {...form}>
@@ -212,7 +247,11 @@ export function SignupForm() {
       <div className="mt-6 text-center text-sm">
         <p className="text-gray-600">
           Already have an account?{" "}
-          <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link 
+            href={`/auth/login${searchParamsData.plan ? `?plan=${searchParamsData.plan}${searchParamsData.kilos ? `&kilos=${searchParamsData.kilos}` : ''}` : 
+              searchParamsData.returnUrl ? `?returnUrl=${searchParamsData.returnUrl}` : ''}`}
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
             Log in
           </Link>
         </p>

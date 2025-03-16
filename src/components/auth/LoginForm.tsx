@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -21,30 +21,46 @@ export function LoginForm() {
   const router = useRouter();
   const { login, user, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const searchParams = useSearchParams();
-  
-  // Get redirect parameters
-  const returnUrl = searchParams?.get('returnUrl');
-  const plan = searchParams?.get('plan');
-  const kilos = searchParams?.get('kilos');
-  
+ // First, update the state definition to properly type the values
+const [searchParamsData, setSearchParamsData] = useState<{
+  returnUrl: string | null;
+  plan: string | null;
+  kilos: string | null;
+}>({
+  returnUrl: null,
+  plan: null,
+  kilos: null
+});
+
+// Now the useEffect will work without type errors
+useEffect(() => {
+  // Only run in the browser environment
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    setSearchParamsData({
+      returnUrl: params.get('returnUrl'),
+      plan: params.get('plan'),
+      kilos: params.get('kilos')
+    });
+  }
+}, []);
   // Build redirect path
-  const redirectPath = plan 
-    ? `/dashboard/orders?plan=${plan}${kilos ? `&kilos=${kilos}` : ''}`
-    : returnUrl || '/dashboard/orders';
+  const redirectPath = searchParamsData.plan 
+    ? `/dashboard/orders?plan=${searchParamsData.plan}${searchParamsData.kilos ? `&kilos=${searchParamsData.kilos}` : ''}`
+    : searchParamsData.returnUrl || '/dashboard/orders';
   
   // If user is already logged in, redirect them
   useEffect(() => {
     if (user && !authLoading) {
-      if (plan) {
-        router.push(`/dashboard/orders?plan=${plan}${kilos ? `&kilos=${kilos}` : ''}`);
-      } else if (returnUrl) {
-        router.push(returnUrl);
+      if (searchParamsData.plan) {
+        router.push(`/dashboard/orders?plan=${searchParamsData.plan}${searchParamsData.kilos ? `&kilos=${searchParamsData.kilos}` : ''}`);
+      } else if (searchParamsData.returnUrl) {
+        router.push(searchParamsData.returnUrl);
       } else {
         router.push('/dashboard/orders');
       }
     }
-  }, [user, authLoading, router, plan, kilos, returnUrl]);
+  }, [user, authLoading, router, searchParamsData]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -84,7 +100,7 @@ export function LoginForm() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Login</h2>
         <p className="text-gray-600">Welcome back! Please sign in to your account</p>
-        {plan && (
+        {searchParamsData.plan && (
           <div className="mt-3 p-3 bg-blue-50 text-blue-700 rounded-md">
             <p>You'll be redirected to complete your order after login.</p>
           </div>
@@ -195,8 +211,8 @@ export function LoginForm() {
         <p className="text-gray-600">
           Don't have an account?{" "}
           <Link 
-            href={`/auth/signup${plan ? `?plan=${plan}${kilos ? `&kilos=${kilos}` : ''}` : 
-              returnUrl ? `?returnUrl=${returnUrl}` : ''}`} 
+            href={`/auth/signup${searchParamsData.plan ? `?plan=${searchParamsData.plan}${searchParamsData.kilos ? `&kilos=${searchParamsData.kilos}` : ''}` : 
+              searchParamsData.returnUrl ? `?returnUrl=${searchParamsData.returnUrl}` : ''}`} 
             className="font-medium text-blue-600 hover:text-blue-500"
           >
             Sign up
