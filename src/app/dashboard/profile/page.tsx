@@ -14,6 +14,22 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
+// Define proper types that match your auth context
+interface Profile {
+  phoneNumber?: string;
+  address?: string;
+  apartment?: string;
+  city?: string;
+  postalCode?: string;
+  defaultPickupInstructions?: string;
+}
+
+interface User {
+  name: string;
+  email: string;
+  profile?: Profile;
+}
+
 export default function ProfilePage() {
   const { user, loading, updateUser, updateProfile } = useAuth();
   
@@ -60,20 +76,22 @@ export default function ProfilePage() {
     
     setIsSaving(true);
     try {
-      // Update user data
+      // Update user basic data
       await updateUser({
         name: formData.name,
         email: formData.email
       });
       
-      // Update profile data
+      // Update profile data - create a profile object structure
       await updateProfile({
-        phoneNumber: formData.phoneNumber,
-        address: formData.address,
-        apartment: formData.apartment,
-        city: formData.city,
-        postalCode: formData.postalCode,
-        defaultPickupInstructions: formData.defaultPickupInstructions
+        profile: {
+          phoneNumber: formData.phoneNumber,
+          address: formData.address,
+          apartment: formData.apartment,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          defaultPickupInstructions: formData.defaultPickupInstructions
+        }
       });
       
       setIsEditing(false);

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { getCurrentUser, signIn, signOut, signUp } from './client';
+import { getCurrentUser, signIn, signOut, signUp, updateUserProfile } from './client';
 import { User, NewUser, AuthResponse } from './types';
 
 interface AuthContextType {
@@ -12,6 +12,8 @@ interface AuthContextType {
   login: (email: string, password: string, redirectPath?: string) => Promise<AuthResponse>;
   register: (userData: NewUser, redirectPath?: string) => Promise<AuthResponse>;
   logout: () => Promise<void>;
+  updateUser: (userData: Partial<User>) => Promise<AuthResponse>;
+  updateProfile: (profileData: Partial<User>) => Promise<AuthResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,6 +73,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // If on auth page with no specific redirect, go to dashboard/orders
         router.push('/dashboard/orders');
       }
+      const handleUpdateUser = async (userData: Partial<User>): Promise<AuthResponse> => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+          const response = await updateUserProfile(userData);
+          
+          if (response.success && response.user) {
+            setUser(response.user);
+          } else {
+            setError(response.error || 'Update failed');
+          }
+          
+          return response;
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+          setError(errorMessage);
+          return { success: false, error: errorMessage };
+        } finally {
+          setLoading(false);
+        }
+      };
+    
+      // Define updateProfile function
+      const handleUpdateProfile = async (profileData: Partial<User>): Promise<AuthResponse> => {
+        return handleUpdateUser(profileData);
+      };
     }
   }, [user, loading, pathname, router, searchParams]);
 
@@ -161,6 +190,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  function handleUpdateUser(userData: Partial<User>): Promise<AuthResponse> {
+    throw new Error('Function not implemented.');
+  }
+
+  function handleUpdateProfile(profileData: Partial<User>): Promise<AuthResponse> {
+    throw new Error('Function not implemented.');
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -170,6 +207,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        updateUser: handleUpdateUser,
+        updateProfile: handleUpdateProfile
       }}
     >
       {children}

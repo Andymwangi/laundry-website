@@ -82,3 +82,29 @@ export async function getCurrentUser(): Promise<User | null> {
     return null;
   }
 }
+// Make sure there are no syntax errors in the export statement
+export async function updateUserProfile(userData: Partial<User>): Promise<AuthResponse> {
+  try {
+    // Implementation depends on your API
+    const response = await fetch('/api/user/profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      return { success: false, error: data.message || 'Failed to update profile' };
+    }
+    
+    return { success: true, user: data.user };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unexpected error occurred' 
+    };
+  }
+}
