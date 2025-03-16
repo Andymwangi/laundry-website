@@ -1,6 +1,6 @@
 'use client';
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -9,22 +9,44 @@ import { useAuth } from '@/lib/auth/auth-context';
 
 export default function PricingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isMonthly, setIsMonthly] = useState(true);
   const { user, loading } = useAuth();
   
   // Handle selection of a pricing plan
   const handleSelectPlan = (plan: string, defaultKilos = 1) => {
+    // Always route through the authentication flow first
     if (!user && !loading) {
-      // Store plan selection to localStorage
+      // Store plan selection info in localStorage for retrieval after login
       localStorage.setItem('selectedPlan', plan);
       localStorage.setItem('defaultKilos', defaultKilos.toString());
-      router.push('/auth/login');
+      
+      // Redirect to login with plan parameters in URL
+      router.push(`/auth/login?plan=${plan}${plan !== 'subscription' ? `&kilos=${defaultKilos}` : ''}`);
       return;
     }
     
-    // Navigate to order page with plan parameters
+    // If user is already logged in, redirect directly to order page
     router.push(`/dashboard/order?plan=${plan}${plan !== 'subscription' ? `&kilos=${defaultKilos}` : ''}`);
   };
+  
+  // Check for redirect from login
+  useEffect(() => {
+    // If user just logged in and we have a stored plan, redirect to orders
+    if (user && !loading) {
+      const storedPlan = localStorage.getItem('selectedPlan');
+      if (storedPlan) {
+        const kilos = localStorage.getItem('defaultKilos') || '1';
+        
+        // Clear stored data
+        localStorage.removeItem('selectedPlan');
+        localStorage.removeItem('defaultKilos');
+        
+        // Redirect to orders with the plan info
+        router.push(`/dashboard/order?plan=${storedPlan}${storedPlan !== 'subscription' ? `&kilos=${kilos}` : ''}`);
+      }
+    }
+  }, [user, loading, router]);
   
   return (
     <div className="container mx-auto py-16 px-4 md:px-6">

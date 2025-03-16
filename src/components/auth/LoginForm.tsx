@@ -1,6 +1,6 @@
 "use client"
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -8,7 +8,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { signIn } from "@/lib/auth/client";
+import { useAuth } from "@/lib/auth/auth-context";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,7 +19,32 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const router = useRouter();
+  const { login, user, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  
+  // Get redirect parameters
+  const returnUrl = searchParams?.get('returnUrl');
+  const plan = searchParams?.get('plan');
+  const kilos = searchParams?.get('kilos');
+  
+  // Build redirect path
+  const redirectPath = plan 
+    ? `/dashboard/orders?plan=${plan}${kilos ? `&kilos=${kilos}` : ''}`
+    : returnUrl || '/dashboard/orders';
+  
+  // If user is already logged in, redirect them
+  useEffect(() => {
+    if (user && !authLoading) {
+      if (plan) {
+        router.push(`/dashboard/orders?plan=${plan}${kilos ? `&kilos=${kilos}` : ''}`);
+      } else if (returnUrl) {
+        router.push(returnUrl);
+      } else {
+        router.push('/dashboard/orders');
+      }
+    }
+  }, [user, authLoading, router, plan, kilos, returnUrl]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -32,13 +57,14 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const result = await signIn(values.email, values.password);
+      const result = await login(values.email, values.password, redirectPath);
       
       if (result.success) {
         toast.success("Login successful", {
           description: "Welcome back to Laundry Basket!",
         });
-        router.push("/");
+        
+        // The redirect will be handled by the AuthContext useEffect
       } else {
         toast.error("Login failed", {
           description: result.error || "Please check your credentials and try again.",
@@ -58,6 +84,11 @@ export function LoginForm() {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Login</h2>
         <p className="text-gray-600">Welcome back! Please sign in to your account</p>
+        {plan && (
+          <div className="mt-3 p-3 bg-blue-50 text-blue-700 rounded-md">
+            <p>You'll be redirected to complete your order after login.</p>
+          </div>
+        )}
       </div>
       
       <Form {...form}>
@@ -102,9 +133,9 @@ export function LoginForm() {
           <Button 
             type="submit" 
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            disabled={isLoading}
+            disabled={isLoading || authLoading}
           >
-            {isLoading ? (
+            {isLoading || authLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Logging in...
@@ -163,7 +194,11 @@ export function LoginForm() {
       <div className="mt-6 text-center text-sm">
         <p className="text-gray-600">
           Don't have an account?{" "}
-          <Link href="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link 
+            href={`/auth/signup${plan ? `?plan=${plan}${kilos ? `&kilos=${kilos}` : ''}` : 
+              returnUrl ? `?returnUrl=${returnUrl}` : ''}`} 
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
             Sign up
           </Link>
         </p>

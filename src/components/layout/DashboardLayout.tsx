@@ -1,7 +1,7 @@
 'use client';
 
-import React, { ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { ReactNode, useEffect } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   User,
@@ -31,18 +31,43 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user, loading, logout } = useAuth();
   
-  // Redirect if not authenticated
-  React.useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login');
+  // Check redirect parameters
+  const plan = searchParams?.get('plan');
+  const kilos = searchParams?.get('kilos');
+  
+  // Handle authentication redirects
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        // If not authenticated, redirect to login
+        // Pass current path as returnUrl if it's not an auth page
+        if (pathname && !pathname.startsWith('/auth/')) {
+          const queryParams = new URLSearchParams();
+          
+          // If we have plan details, forward them to the login page
+          if (plan) {
+            queryParams.set('plan', plan);
+            if (kilos) queryParams.set('kilos', kilos);
+          } else {
+            // Otherwise, set a return URL to come back here
+            queryParams.set('returnUrl', pathname);
+          }
+          
+          router.push(`/auth/login?${queryParams.toString()}`);
+        } else {
+          router.push('/auth/login');
+        }
+      }
     }
-  }, [loading, user, router]);
+  }, [loading, user, router, pathname, plan, kilos]);
   
   const handleLogout = async () => {
     await logout();
-    router.push('/');
+    // The redirect to login page is handled in the auth context
   };
   
   const sidebarLinks = [
@@ -136,7 +161,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-600 transition-all hover:text-blue-600 hover:bg-blue-50"
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-blue-600 hover:bg-blue-50 ${
+                    pathname === link.href ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+                  }`}
                 >
                   <Icon className="h-5 w-5" />
                   {link.label}

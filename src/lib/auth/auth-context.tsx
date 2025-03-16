@@ -1,132 +1,177 @@
-// src/lib/auth/auth-context.ts (update)
 'use client';
 
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { User, Profile } from '@/lib/db/schema';
-
-type AuthUser = User & {
-  profile?: Profile;
-};
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { getCurrentUser, signIn, signOut, signUp } from './client';
+import { User, NewUser, AuthResponse } from './types';
 
 interface AuthContextType {
-  user: AuthUser | null;
+  user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  error: string | null;
+  login: (email: string, password: string, redirectPath?: string) => Promise<AuthResponse>;
+  register: (userData: NewUser, redirectPath?: string) => Promise<AuthResponse>;
   logout: () => Promise<void>;
-  updateUser: (userData: Partial<AuthUser>) => Promise<void>;
-  updateProfile: (profileData: Partial<Profile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  // Fetch the current user on initial load
+  // Check if user is logged in on mount
   useEffect(() => {
-    const fetchCurrentUser = async () => {
+    const fetchUser = async () => {
       try {
-        const response = await fetch('/api/auth/me');
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData.user);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
-        setUser(null);
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+      } catch (err) {
+        setError('Failed to fetch user');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCurrentUser();
+    fetchUser();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Login failed');
+  // Handle post-login redirection
+  useEffect(() => {
+    if (user && !loading) {
+      // Check URL parameters for redirect instructions
+      const returnUrl = searchParams?.get('returnUrl');
+      const plan = searchParams?.get('plan');
+      
+      // Check if there's stored plan info from pricing page
+      const storedPlan = localStorage.getItem('selectedPlan');
+      const storedKilos = localStorage.getItem('defaultKilos');
+      
+      if (plan || storedPlan) {
+        // Clear stored plan info if it exists
+        if (storedPlan) {
+          localStorage.removeItem('selectedPlan');
+          localStorage.removeItem('defaultKilos');
+        }
+        
+        // Use URL parameters first, fall back to stored values
+        const planToUse = plan || storedPlan;
+        const kilosToUse = searchParams?.get('kilos') || storedKilos || '1';
+        
+        // Redirect to order page with plan info
+        router.push(`/dashboard/orders?plan=${planToUse}${planToUse !== 'subscription' ? `&kilos=${kilosToUse}` : ''}`);
+      } else if (returnUrl) {
+        // If there's a return URL but no plan, redirect there
+        router.push(returnUrl);
+      } else if (pathname?.startsWith('/auth/')) {
+        // If on auth page with no specific redirect, go to dashboard/orders
+        router.push('/dashboard/orders');
       }
+    }
+  }, [user, loading, pathname, router, searchParams]);
 
-      const data = await response.json();
-      setUser(data.user);
-      return data;
-    } catch (error: any) {
-      console.error('Login error:', error);
-      throw error;
+  const login = async (email: string, password: string, redirectPath?: string): Promise<AuthResponse> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await signIn(email, password);
+      
+      if (response.success && response.user) {
+        setUser(response.user);
+        
+        // If a specific redirect path is provided, store it for the useEffect to handle
+        if (redirectPath) {
+          if (redirectPath.includes('plan=')) {
+            // Extract and store plan details for redirection
+            const url = new URL(`http://dummy.com${redirectPath}`);
+            const plan = url.searchParams.get('plan');
+            const kilos = url.searchParams.get('kilos');
+            
+            if (plan) localStorage.setItem('selectedPlan', plan);
+            if (kilos) localStorage.setItem('defaultKilos', kilos);
+          }
+        }
+      } else {
+        setError(response.error || 'Login failed');
+      }
+      
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
   };
 
-  const logout = async () => {
+  const register = async (userData: NewUser, redirectPath?: string): Promise<AuthResponse> => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      const response = await signUp(userData);
+      
+      if (response.success && response.user) {
+        setUser(response.user);
+        
+        // If a specific redirect path is provided, store it for the useEffect to handle
+        if (redirectPath) {
+          if (redirectPath.includes('plan=')) {
+            // Extract and store plan details for redirection
+            const url = new URL(`http://dummy.com${redirectPath}`);
+            const plan = url.searchParams.get('plan');
+            const kilos = url.searchParams.get('kilos');
+            
+            if (plan) localStorage.setItem('selectedPlan', plan);
+            if (kilos) localStorage.setItem('defaultKilos', kilos);
+          }
+        }
+      } else {
+        setError(response.error || 'Registration failed');
+      }
+      
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    setLoading(true);
+    
+    try {
+      await signOut();
       setUser(null);
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
-  const updateUser = async (userData: Partial<AuthUser>) => {
-    if (!user) return;
-    
-    try {
-      const response = await fetch('/api/users/update', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update user');
-      }
-
-      const updatedUser = await response.json();
-      setUser(prev => prev ? { ...prev, ...updatedUser.user } : null);
-      return updatedUser;
-    } catch (error) {
-      console.error('Update user error:', error);
-      throw error;
-    }
-  };
-
-  const updateProfile = async (profileData: Partial<Profile>) => {
-    if (!user) return;
-    
-    try {
-      const response = await fetch('/api/profiles/update', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profileData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
-      }
-
-      const updatedProfile = await response.json();
-      setUser(prev => prev ? { ...prev, profile: { ...prev.profile, ...updatedProfile.profile } } : null);
-      return updatedProfile;
-    } catch (error) {
-      console.error('Update profile error:', error);
-      throw error;
+      // Redirect to login page after logout
+      router.push('/auth/login');
+    } catch (err) {
+      setError('Failed to log out');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateUser, updateProfile }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        error,
+        login,
+        register,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
