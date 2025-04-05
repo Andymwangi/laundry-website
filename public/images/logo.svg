@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
+  <!-- Washing Machine Body - optimized for navbar -->
+  <rect x="5" y="5" width="40" height="40" rx="3" ry="3" fill="white" stroke="#0a2756" stroke-width="1.5"/>
+  
+  <!-- Control Panel -->
+  <rect x="5" y="5" width="40" height="8" rx="2" ry="2" fill="white" stroke="#0a2756" stroke-width="1"/>
+  
+  <!-- Simplified knobs -->
+  <circle cx="12" cy="9" r="2" fill="white" stroke="#0a2756" stroke-width="0.8"/>
+  <circle cx="25" cy="9" r="2" fill="white" stroke="#0a2756" stroke-width="0.8"/>
+  <circle cx="38" cy="9" r="2" fill="white" stroke="#0a2756" stroke-width="0.8"/>
+  
+  <!-- Door window -->
+  <circle cx="25" cy="29" r="14" fill="white" stroke="#0a2756" stroke-width="1.5"/>
+  <circle cx="25" cy="29" r="12" fill="white" stroke="#0a2756" stroke-width="0.5" stroke-dasharray="1,1"/>
+  
+  <!-- Simple arc-shaped clothes -->
+  <path d="M18 25 Q25 20 32 25" fill="none" stroke="#0a2756" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M16 29 Q25 22 34 29" fill="none" stroke="#0a2756" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M18 33 Q25 28 32 33" fill="none" stroke="#0a2756" stroke-width="1.2" stroke-linecap="round"/>
+  
+  <!-- Minimal bubbles -->
+  <circle cx="21" cy="27" r="1" fill="#0a2756" opacity="0.8"/>
+  <circle cx="29" cy="26" r="0.8" fill="#0a2756" opacity="0.8"/>
+  <circle cx="25" cy="31" r="1" fill="#0a2756" opacity="0.8"/>
+</svg>
