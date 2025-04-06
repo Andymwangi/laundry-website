@@ -15,11 +15,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Disable critters (minify CSS) optimization
-  experimental: {
-    // If you're using Next.js 12 or newer with the 'optimizeCss' feature
-    optimizeCss: false,
-  },
   // Suppress specific build warnings (optional)
   onDemandEntries: {
     // The number of pages that should be kept in memory
@@ -35,7 +30,8 @@ const nextConfig = {
     
     return config;
   },
-  output: 'standalone', // Changed from 'export' for proper API route support
+  // Use standalone output for proper API route support
+  output: 'standalone',
   images: {
     domains: ['randomuser.me'],
     unoptimized: process.env.NODE_ENV === 'production' // Only unoptimize in production

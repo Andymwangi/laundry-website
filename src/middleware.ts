@@ -66,11 +66,20 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// Routes that should be handled dynamically - these will be excluded from static generation
 export const config = {
   matcher: [
+    // Home and static pages that use auth context
     "/",
+    // Auth-related pages
     "/auth/:path*",
+    // Dashboard pages that need auth
     "/dashboard/:path*",
+    // Pages that might have dynamic content
     "/pricing",
+    "/services",
+    "/products",
+    "/about",
+    "/contact",
   ],
 };

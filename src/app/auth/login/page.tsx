@@ -1,3 +1,6 @@
+// Import shared configuration
+export { dynamic, runtime, generateStaticParams } from '../../page-config';
+
 import { LoginForm } from '@/components/auth/LoginForm';
 import { AuthBanner } from '@/components/auth/AuthBanner';
 

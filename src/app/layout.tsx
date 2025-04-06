@@ -8,6 +8,7 @@ import Footer from '@/components/layout/Footer';
 import { Toaster } from 'sonner'
 import { AuthProvider } from '@/lib/auth/auth-context';
 import { CartProvider } from '@/components/cart/CartProvider';
+import { Suspense } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,15 +26,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <CartProvider>
-            <Navbar />
-            <Sidebar />
-            {children}
-            <Footer />
-          </CartProvider>
-        </AuthProvider>
-        <Toaster />
+        <Suspense fallback={<div className="flex h-screen items-center justify-center text-blue-600 font-bold text-xl">Loading...</div>}>
+          <AuthProvider>
+            <CartProvider>
+              <Navbar />
+              <Sidebar />
+              {children}
+              <Footer />
+            </CartProvider>
+          </AuthProvider>
+          <Toaster />
+        </Suspense>
       </body>
     </html>
   );

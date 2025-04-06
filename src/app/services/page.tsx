@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { Separator } from '@/components/ui/separator'
 import { ContactFormDialog } from '@/components/ui/contact-form'
 
+// Import shared configuration
+export { dynamic, runtime, generateStaticParams } from '../page-config';
+
 const services = [
   {
     id: 'washing',
