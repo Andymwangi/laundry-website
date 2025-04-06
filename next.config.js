@@ -5,6 +5,8 @@ const nextConfig = {
   experimental: {
     // Next.js 14 specific experimental features
     optimizeCss: false,
+    // This is needed to prevent errors during export
+    appDir: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -24,17 +26,20 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     // The number of pages that should be kept in memory
     pagesBufferLength: 2,
-      // Ignore specific errors during build
-      // This is a bit of a hack and not officially supported
-    },
-    webpack: (config, { isServer }) => {
-      // This will reduce the verbosity of the build output
-      config.infrastructureLogging = {
-        level: 'error', // Only show errors, not warnings
-      };
-      
-      return config;
-    },
+  },
+  webpack: (config, { isServer }) => {
+    // This will reduce the verbosity of the build output
+    config.infrastructureLogging = {
+      level: 'error', // Only show errors, not warnings
+    };
+    
+    return config;
+  },
+  output: 'standalone', // Changed from 'export' for proper API route support
+  images: {
+    domains: ['randomuser.me'],
+    unoptimized: process.env.NODE_ENV === 'production' // Only unoptimize in production
+  },
 };
 
 module.exports = nextConfig;

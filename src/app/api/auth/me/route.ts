@@ -5,6 +5,9 @@ import { eq } from 'drizzle-orm';
 import { cookies } from 'next/headers';
 import { verify } from 'jsonwebtoken';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET() {
   try {
     // Get token from cookies
