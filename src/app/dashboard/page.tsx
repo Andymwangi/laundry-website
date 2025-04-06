@@ -1,5 +1,3 @@
-'use client';
-
 // Import dashboard-specific configuration
 export { dynamic, runtime, generateStaticParams } from './config';
 
