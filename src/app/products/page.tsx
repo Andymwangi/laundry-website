@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth/auth-context';
+import { MinusCircle, PlusCircle } from 'lucide-react';
 
 // Define product types
 type ProductCategory = 'laundry' | 'dry_cleaning' | 'household' | 'supplies';
@@ -30,7 +31,7 @@ const PRODUCTS: Product[] = [
     description: 'Standard cleaning for everyday items. Per kg pricing.',
     price: 50,
     category: 'laundry',
-    image: '/products/regular-wash.jpg',
+    image: '/images/products/regular-wash.jpg',
     tags: ['everyday', 'shirts', 'general'],
   },
   {
@@ -39,7 +40,7 @@ const PRODUCTS: Product[] = [
     description: 'Premium service with stain treatment and fabric care. Per kg pricing.',
     price: 80,
     category: 'laundry',
-    image: '/products/premium-wash.jpg',
+    image: '/images/products/premium-wash.jpg',
     tags: ['premium', 'stain treatment'],
     isBestSeller: true,
   },
@@ -49,7 +50,7 @@ const PRODUCTS: Product[] = [
     description: 'Fast turnaround for urgent laundry needs. Completed same day when dropped before 10 AM.',
     price: 100,
     category: 'laundry',
-    image: '/products/express-wash.jpg',
+    image: '/images/products/express-wash.jpg',
     tags: ['express', 'same day', 'urgent'],
     isBestSeller: true,
   },
@@ -59,7 +60,7 @@ const PRODUCTS: Product[] = [
     description: 'Regular laundry service with scheduled pickups and deliveries. 20kg per month.',
     price: 3500,
     category: 'laundry',
-    image: '/products/subscription.jpg',
+    image: '/images/products/subscription.jpg',
     tags: ['subscription', 'regular', 'monthly'],
   },
   {
@@ -68,7 +69,7 @@ const PRODUCTS: Product[] = [
     description: 'Professional cleaning for suits and formal wear.',
     price: 650,
     category: 'dry_cleaning',
-    image: '/products/suit-cleaning.jpg',
+    image: '/images/products/suit-cleaning.jpg',
     tags: ['formal', 'professional'],
   },
   {
@@ -77,7 +78,7 @@ const PRODUCTS: Product[] = [
     description: 'Gentle cleaning for all types of dresses.',
     price: 450,
     category: 'dry_cleaning',
-    image: '/products/dress-cleaning.jpg',
+    image: '/images/products/dress-cleaning.jpg',
     tags: ['formal', 'special occasion'],
   },
   {
@@ -86,7 +87,7 @@ const PRODUCTS: Product[] = [
     description: 'Specialized cleaning and preservation for wedding gowns.',
     price: 2500,
     category: 'dry_cleaning',
-    image: '/products/wedding-dress.jpg',
+    image: '/images/products/wedding-dress.jpg',
     tags: ['wedding', 'special occasion', 'preservation'],
   },
   {
@@ -95,7 +96,7 @@ const PRODUCTS: Product[] = [
     description: 'Expert care for leather and suede garments.',
     price: 1200,
     category: 'dry_cleaning',
-    image: '/products/leather-clean.jpg',
+    image: '/images/products/leather-clean.jpg',
     tags: ['leather', 'suede', 'specialty'],
   },
   {
@@ -104,7 +105,7 @@ const PRODUCTS: Product[] = [
     description: 'Deep cleaning for curtains of all sizes. Pricing per panel.',
     price: 350,
     category: 'household',
-    image: '/products/curtain-cleaning.jpg',
+    image: '/images/products/curtain-cleaning.jpg',
     tags: ['home', 'household'],
   },
   {
@@ -113,7 +114,7 @@ const PRODUCTS: Product[] = [
     description: 'Deep cleaning for all bedding items. Fixed price per item.',
     price: 500,
     category: 'household',
-    image: '/products/bedding-cleaning.jpg',
+    image: '/images/products/bedding-cleaning.jpg',
     tags: ['home', 'bedding', 'comforters'],
   },
   {
@@ -122,7 +123,7 @@ const PRODUCTS: Product[] = [
     description: 'Professional carpet cleaning service. Price per square meter.',
     price: 150,
     category: 'household',
-    image: '/products/carpet-clean.jpg',
+    image: '/images/products/carpet-clean.jpg',
     tags: ['carpet', 'household', 'deep cleaning'],
   },
   {
@@ -131,7 +132,7 @@ const PRODUCTS: Product[] = [
     description: 'Refresh your furniture with our professional cleaning service.',
     price: 1800,
     category: 'household',
-    image: '/products/sofa-clean.jpg',
+    image: '/images/products/sofa-clean.jpg',
     tags: ['furniture', 'upholstery', 'household'],
   },
   {
@@ -140,7 +141,7 @@ const PRODUCTS: Product[] = [
     description: 'Environmentally friendly detergent option for your laundry.',
     price: 120,
     category: 'supplies',
-    image: '/products/eco-detergent.jpg',
+    image: '/images/products/eco-detergent.jpg',
     tags: ['eco', 'supplies'],
   },
   {
@@ -149,7 +150,7 @@ const PRODUCTS: Product[] = [
     description: 'Advanced stain removal treatment for tough stains.',
     price: 180,
     category: 'supplies',
-    image: '/products/stain-remover.jpg',
+    image: '/images/products/stain-remover.jpg',
     tags: ['stain', 'supplies'],
   },
   {
@@ -158,7 +159,7 @@ const PRODUCTS: Product[] = [
     description: 'Luxury fabric softener that leaves clothes feeling soft and fresh.',
     price: 150,
     category: 'supplies',
-    image: '/products/fabric-softener.jpg',
+    image: '/images/products/fabric-softener.jpg',
     tags: ['softener', 'supplies', 'premium'],
   },
   {
@@ -167,13 +168,14 @@ const PRODUCTS: Product[] = [
     description: 'Durable and washable laundry bag for storing and transporting clothes.',
     price: 250,
     category: 'supplies',
-    image: '/products/laundry-bag.jpg',
+    image: '/images/products/laundry-bag.jpg',
     tags: ['bag', 'storage', 'eco-friendly'],
   },
 ];
 
 export default function ProductsPage() {
   const [category, setCategory] = useState<ProductCategory | 'all'>('all');
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
   const router = useRouter();
   const { user } = useAuth();
 
@@ -182,19 +184,45 @@ export default function ProductsPage() {
     ? PRODUCTS 
     : PRODUCTS.filter(product => product.category === category);
 
+  // Increment quantity
+  const incrementQuantity = (productId: string) => {
+    setQuantities(prev => ({
+      ...prev,
+      [productId]: (prev[productId] || 1) + 1
+    }));
+  };
+
+  // Decrement quantity
+  const decrementQuantity = (productId: string) => {
+    setQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max((prev[productId] || 1) - 1, 1)
+    }));
+  };
+
+  // Get quantity for a product
+  const getQuantity = (productId: string) => {
+    return quantities[productId] || 1;
+  };
+
   // Handle add to cart
   const handleAddToCart = (product: Product) => {
+    const quantity = getQuantity(product.id);
+    
     if (!user) {
       // Store product in localStorage to retrieve after login
-      localStorage.setItem('cartProduct', JSON.stringify(product));
-      router.push(`/auth/login?returnUrl=/dashboard/checkout&product=${product.id}`);
+      localStorage.setItem('cartProduct', JSON.stringify({
+        ...product,
+        quantity
+      }));
+      
+      router.push(`/auth/login?returnUrl=/dashboard/cart&product=${product.id}`);
       return;
     }
 
-    // If user is logged in, add to cart directly
-    // In a real implementation, this would call an API to add to the user's cart
-    // For now, we'll just redirect to checkout with the product info
-    router.push(`/dashboard/checkout?product=${product.id}&name=${encodeURIComponent(product.name)}&price=${product.price}`);
+    // If user is logged in, add to cart directly via URL parameters
+    // We'll encode all needed information in the URL for the cart page to process
+    router.push(`/dashboard/cart?product=${product.id}&name=${encodeURIComponent(product.name)}&price=${product.price}&quantity=${quantity}`);
   };
 
   return (
@@ -248,39 +276,74 @@ export default function ProductsPage() {
       {/* Product grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredProducts.map((product) => (
-          <Card key={product.id} className="flex flex-col h-full relative overflow-hidden">
-            {product.isBestSeller && (
-              <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 z-10">
-                BEST SELLER
-              </div>
-            )}
-            
-            <div className="h-48 bg-gray-100 relative">
-              {/* Placeholder for product image - in a real app, use Next.js Image component */}
-              <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                {product.name}
-              </div>
+          <Card key={product.id} className="overflow-hidden flex flex-col h-full">
+            <div className="relative h-48 bg-gray-100">
+              {product.image && (
+                <div 
+                  className="absolute inset-0 bg-center bg-cover"
+                  style={{ backgroundImage: `url(${product.image})` }}
+                />
+              )}
+              {product.isBestSeller && (
+                <Badge className="absolute top-2 right-2 bg-yellow-500">
+                  Best Seller
+                </Badge>
+              )}
             </div>
             
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg">{product.name}</CardTitle>
-                <Badge className="ml-2">{product.category.replace('_', ' ')}</Badge>
-              </div>
+            <CardHeader>
+              <CardTitle>{product.name}</CardTitle>
               <CardDescription>{product.description}</CardDescription>
             </CardHeader>
             
-            <CardContent className="grow">
-              <div className="flex flex-wrap gap-1 mt-2">
-                {product.tags?.map(tag => (
-                  <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+            <CardContent className="flex-grow">
+              <div className="flex flex-wrap gap-2 mt-2">
+                {product.tags?.map((tag) => (
+                  <Badge key={tag} variant="outline">
+                    {tag}
+                  </Badge>
                 ))}
               </div>
+              
+              <div className="mt-4 text-xl font-bold">
+                KES {product.price}
+                {product.category === 'laundry' && product.id !== 'subscription' && '/kg'}
+              </div>
+              
+              {product.category === 'supplies' && (
+                <div className="flex items-center space-x-3 mt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={() => decrementQuantity(product.id)}
+                  >
+                    <MinusCircle className="h-4 w-4" />
+                  </Button>
+                  
+                  <span className="text-center font-medium w-8">
+                    {getQuantity(product.id)}
+                  </span>
+                  
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={() => incrementQuantity(product.id)}
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </CardContent>
             
-            <CardFooter className="border-t pt-4 flex justify-between items-center mt-auto">
-              <div className="font-bold text-lg">KES {product.price}</div>
-              <Button onClick={() => handleAddToCart(product)}>Add to Cart</Button>
+            <CardFooter>
+              <Button 
+                className="w-full" 
+                onClick={() => handleAddToCart(product)}
+              >
+                Add to Cart
+              </Button>
             </CardFooter>
           </Card>
         ))}

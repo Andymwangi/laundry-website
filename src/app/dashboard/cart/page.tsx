@@ -8,9 +8,41 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from '@/components/ui/separator';
 import { MinusCircle, PlusCircle, ShoppingCart, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function CartPage() {
-  const { items, totalPrice, updateQuantity, removeItem, checkout } = useCart();
+  const { items, totalPrice, updateQuantity, removeItem, checkout, addItem } = useCart();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [processedParams, setProcessedParams] = useState(false);
+  
+  // Handle URL parameters to add product to cart - only process once
+  useEffect(() => {
+    if (processedParams) return;
+    
+    const productId = searchParams.get('product');
+    const productName = searchParams.get('name');
+    const productPrice = searchParams.get('price');
+    const productQuantity = searchParams.get('quantity');
+    
+    if (productId && productName && productPrice) {
+      // Add product to cart with exact quantity
+      addItem({
+        id: productId,
+        name: decodeURIComponent(productName),
+        price: Number(productPrice),
+        type: 'product',
+        quantity: productQuantity ? Number(productQuantity) : 1
+      });
+      
+      // Mark parameters as processed
+      setProcessedParams(true);
+      
+      // Clear URL parameters
+      router.replace('/dashboard/cart');
+    }
+  }, [searchParams, addItem, router, processedParams]);
 
   if (items.length === 0) {
     return (
@@ -122,7 +154,7 @@ export default function CartPage() {
           <Button variant="outline">Continue Shopping</Button>
         </Link>
         
-        <Link href="/dashboard/orders">
+        <Link href="/dashboard/orders/history">
           <Button variant="outline">View My Orders</Button>
         </Link>
       </div>

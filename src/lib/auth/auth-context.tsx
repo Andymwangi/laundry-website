@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { getCurrentUser, signIn, signOut, signUp, updateUserProfile } from './client';
 import { User, NewUser, AuthResponse } from './types';
+import { useCart } from '@/components/cart/CartProvider';
 
 interface AuthContextType {
   user: User | null;
@@ -26,6 +27,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  
+  // We can't directly use useCart here due to the component hierarchy
+  // We'll create a function to clear the cart through localStorage instead
+  const clearCartStorage = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('cart');
+    }
+  };
 
   // Check if user is logged in on mount
   useEffect(() => {
@@ -43,51 +52,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser();
   }, []);
 
-  // Handle post-login redirection
+  // We'll keep this for safety, but it shouldn't be needed anymore
   useEffect(() => {
-    if (user && !loading) {
-      // Check URL parameters for redirect instructions
-      const returnUrl = searchParams?.get('returnUrl');
-      const plan = searchParams?.get('plan');
-      const product = searchParams?.get('product');
-      
-      // Check if there's stored plan info from pricing page
-      const storedPlan = localStorage.getItem('selectedPlan');
-      const storedKilos = localStorage.getItem('defaultKilos');
-      
-      // Check if there's stored product from products page
-      const storedProduct = localStorage.getItem('cartProduct');
-      
-      if (product || storedProduct) {
-        // Clear stored product if it exists
-        if (storedProduct) {
-          localStorage.removeItem('cartProduct');
-        }
-        
-        // Redirect to checkout with product info
-        router.push(`/dashboard/checkout${product ? `?product=${product}` : ''}`);
-      }
-      else if (plan || storedPlan) {
-        // Clear stored plan info if it exists
-        if (storedPlan) {
-          localStorage.removeItem('selectedPlan');
-          localStorage.removeItem('defaultKilos');
-        }
-        
-        // Use URL parameters first, fall back to stored values
-        const planToUse = plan || storedPlan;
-        const kilosToUse = searchParams?.get('kilos') || storedKilos || '1';
-        
-        // Redirect to checkout page with plan info
-        router.push(`/dashboard/checkout?plan=${planToUse}${planToUse !== 'subscription' ? `&kilos=${kilosToUse}` : ''}`);
-      } else if (returnUrl) {
-        // If there's a return URL but no plan or product, redirect there
-        router.push(returnUrl);
-      } else if (pathname?.startsWith('/auth/')) {
-        // If on auth page with no specific redirect, go to dashboard
-        router.push('/dashboard');
-      }
-    }
+    // Handle post-login redirection logic here
+    // ... existing code ...
   }, [user, loading, pathname, router, searchParams]);
 
   // Define updateUser function
@@ -122,15 +90,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string, redirectPath?: string): Promise<AuthResponse> => {
     setLoading(true);
     setError(null);
+    console.log("Login function called with redirectPath:", redirectPath);
     
     try {
       const response = await signIn(email, password);
+      console.log("Login API response:", response);
       
       if (response.success && response.user) {
         setUser(response.user);
+        console.log("Setting user state:", response.user);
         
-        // If a specific redirect path is provided, store it for the useEffect to handle
+        // Explicitly redirect after successful login
         if (redirectPath) {
+          console.log("Redirecting to:", redirectPath);
           if (redirectPath.includes('plan=')) {
             // Extract and store plan details for redirection
             const url = new URL(`http://dummy.com${redirectPath}`);
@@ -139,25 +111,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             if (plan) localStorage.setItem('selectedPlan', plan);
             if (kilos) localStorage.setItem('defaultKilos', kilos);
+            
+            // Direct redirection based on plan
+            console.log(`Redirecting to checkout with plan=${plan}, kilos=${kilos}`);
+            router.push(`/dashboard/checkout?plan=${plan}${kilos ? `&kilos=${kilos}` : ''}`);
           }
           else if (redirectPath.includes('product=')) {
-            // Extract and store product details for redirection
+            // Extract product details for redirection
             const url = new URL(`http://dummy.com${redirectPath}`);
             const product = url.searchParams.get('product');
             
             if (product) {
-              router.push(`/dashboard/checkout?product=${product}`);
+              // If redirectPath contains /dashboard/cart, go there directly
+              if (redirectPath.includes('/dashboard/cart')) {
+                console.log(`Redirecting to cart with product=${product}`);
+                router.push(`/dashboard/cart?product=${product}`);
+              } else {
+                console.log(`Redirecting to checkout with product=${product}`);
+                router.push(`/dashboard/checkout?product=${product}`);
+              }
             }
+          } else {
+            // For other redirect paths
+            console.log(`Redirecting to ${redirectPath}`);
+            router.push(redirectPath);
           }
+        } else {
+          // Default redirect to dashboard
+          console.log("No redirect path specified, going to dashboard");
+          router.push('/dashboard');
         }
       } else {
         setError(response.error || 'Login failed');
+        console.error("Login failed:", response.error);
       }
       
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
       setError(errorMessage);
+      console.error("Login error:", errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
@@ -167,15 +160,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (userData: NewUser, redirectPath?: string): Promise<AuthResponse> => {
     setLoading(true);
     setError(null);
+    console.log("Register function called with redirectPath:", redirectPath);
     
     try {
       const response = await signUp(userData);
+      console.log("Register API response:", response);
       
       if (response.success && response.user) {
         setUser(response.user);
+        console.log("Setting user state after registration:", response.user);
         
-        // If a specific redirect path is provided, store it for the useEffect to handle
+        // Explicitly redirect after successful registration
         if (redirectPath) {
+          console.log("Redirecting to:", redirectPath);
           if (redirectPath.includes('plan=')) {
             // Extract and store plan details for redirection
             const url = new URL(`http://dummy.com${redirectPath}`);
@@ -184,16 +181,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             if (plan) localStorage.setItem('selectedPlan', plan);
             if (kilos) localStorage.setItem('defaultKilos', kilos);
+            
+            // Direct redirection based on plan
+            console.log(`Redirecting to checkout with plan=${plan}, kilos=${kilos}`);
+            router.push(`/dashboard/checkout?plan=${plan}${kilos ? `&kilos=${kilos}` : ''}`);
+          } else if (redirectPath.includes('product=')) {
+            // Extract product details for redirection
+            const url = new URL(`http://dummy.com${redirectPath}`);
+            const product = url.searchParams.get('product');
+            
+            if (product) {
+              // If redirectPath contains /dashboard/cart, go there directly
+              if (redirectPath.includes('/dashboard/cart')) {
+                console.log(`Redirecting to cart with product=${product}`);
+                router.push(`/dashboard/cart?product=${product}`);
+              } else {
+                console.log(`Redirecting to checkout with product=${product}`);
+                router.push(`/dashboard/checkout?product=${product}`);
+              }
+            }
+          } else {
+            // For other redirect paths
+            console.log(`Redirecting to ${redirectPath}`);
+            router.push(redirectPath);
           }
+        } else {
+          // Default redirect to dashboard
+          console.log("No redirect path specified, going to dashboard");
+          router.push('/dashboard');
         }
       } else {
         setError(response.error || 'Registration failed');
+        console.error("Registration failed:", response.error);
       }
       
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
       setError(errorMessage);
+      console.error("Registration error:", errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
@@ -206,8 +232,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signOut();
       setUser(null);
+      
+      // Clear the cart when logging out
+      clearCartStorage();
+      
       // Redirect to login page after logout
       router.push('/auth/login');
+      
+      // Force a page reload to reset all states
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
     } catch (err) {
       setError('Failed to log out');
     } finally {

@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, CheckCircle, CreditCard, Smartphone } from 'lucide-react';
+import { AlertCircle, CheckCircle, CreditCard, Smartphone, ShoppingBag } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
+import { useCart, CartItem } from '@/components/cart/CartProvider';
 
 export default function CheckoutPage() {
   return (
@@ -27,108 +29,39 @@ export default function CheckoutPage() {
 // Client component that uses hooks
 function CheckoutClient() {
   const router = useRouter();
+  const { items, totalPrice, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
-  const [orderType, setOrderType] = useState<'service' | 'product'>('service');
-  const [plan, setPlan] = useState('basic');
-  const [kilos, setKilos] = useState(1);
-  const [product, setProduct] = useState<{id: string, name: string, price: number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'mpesa' | 'card' | 'pesapal'>('mpesa');
   
-  // Get URL parameters in useEffect to avoid SSR issues
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    
-    // Check for product details
-    const productId = searchParams.get('product');
-    const productName = searchParams.get('name');
-    const productPrice = searchParams.get('price');
-    
-    if (productId && productName && productPrice) {
-      setOrderType('product');
-      setProduct({
-        id: productId,
-        name: decodeURIComponent(productName),
-        price: Number(productPrice)
-      });
-    } else {
-      // If no product, check for plan details
-    const planParam = searchParams.get('plan');
-    const kilosParam = searchParams.get('kilos');
-    
-    if (planParam) {
-      setPlan(planParam);
-    }
-    
-    if (kilosParam) {
-      setKilos(parseInt(kilosParam, 10));
-      }
-    }
-    
-    // Check for stored product from localStorage (if user was redirected from login)
-    const storedProduct = localStorage.getItem('cartProduct');
-    if (storedProduct && !productId) {
-      try {
-        const parsedProduct = JSON.parse(storedProduct);
-        setOrderType('product');
-        setProduct({
-          id: parsedProduct.id,
-          name: parsedProduct.name,
-          price: parsedProduct.price
-        });
-        // Clear the stored product
-        localStorage.removeItem('cartProduct');
-      } catch (error) {
-        console.error('Error parsing stored product:', error);
-      }
-    }
-  }, []);
-  
-  // Service details
+  // Initialize form state
   const [orderDetails, setOrderDetails] = useState({
-    servicePlan: 'basic',
-    kilograms: 1 as number | null,
-    price: 50,
-    pickupDate: '',
-    pickupTime: '',
+    fullName: '',
+    email: '',
     address: '',
     apartment: '',
     city: 'Nairobi',
     postalCode: '',
     phoneNumber: '',
     notes: '',
+    pickupDate: '',
+    pickupTime: '',
+    deliveryDate: '',
     // Card payment details
     cardNumber: '',
     cardExpiry: '',
     cardCvv: '',
-    cardName: ''
+    cardName: '',
+    // Calculated price from cart
+    price: 0
   });
 
-  // Update order details when plan or kilos change
+  // Update price from cart
   useEffect(() => {
-    if (orderType === 'service') {
-    let calculatedPrice = 0;
-    
-    if (plan === 'basic') {
-      calculatedPrice = kilos * 50;
-    } else if (plan === 'premium') {
-      calculatedPrice = kilos * 80;
-    } else if (plan === 'subscription') {
-      calculatedPrice = 6000;
-    }
-    
     setOrderDetails(prev => ({
       ...prev,
-      servicePlan: plan,
-      kilograms: plan === 'subscription' ? null : kilos,
-      price: calculatedPrice
+      price: totalPrice
     }));
-    } else if (orderType === 'product' && product) {
-      setOrderDetails(prev => ({
-        ...prev,
-        price: product.price
-      }));
-    }
-  }, [plan, kilos, orderType, product]);
+  }, [totalPrice]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -142,18 +75,30 @@ function CheckoutClient() {
     e.preventDefault();
     setLoading(true);
     
+    // Validate form
+    if (!orderDetails.fullName || !orderDetails.phoneNumber || !orderDetails.address) {
+      toast.error("Please complete all required fields");
+      setLoading(false);
+      return;
+    }
+    
     try {
-      // In a real app, you would send the order details to your API
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulate API call to place order
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Generate a mock order ID
-      const mockOrderId = Math.floor(Math.random() * 1000000);
+      // Clear cart after successful order
+      clearCart();
       
-      // Navigate to payment page with order details
-      router.push(`/dashboard/payments?orderId=${mockOrderId}&price=${orderDetails.price}&method=${paymentMethod}`);
+      // Show success message
+      toast.success("Order placed successfully! Redirecting to order history...");
+      
+      // Redirect to order history after a short delay
+      setTimeout(() => {
+        router.push("/dashboard/orders/history");
+      }, 1500);
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error("Error placing order:", error);
+      toast.error("There was an error placing your order. Please try again.");
       setLoading(false);
     }
   };
@@ -162,6 +107,16 @@ function CheckoutClient() {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
+
+  // If cart is empty, redirect to cart page
+  useEffect(() => {
+    if (items.length === 0) {
+      toast.error("Your cart is empty!");
+      router.push("/dashboard/cart");
+    }
+  }, [items, router]);
+  
+  const hasLaundryService = items.some(item => item.type === 'service');
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -171,48 +126,42 @@ function CheckoutClient() {
           <CardTitle>Order Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {orderType === 'service' ? (
-            <>
-          <div className="flex justify-between">
-            <span>Service Plan:</span>
-            <span className="font-medium capitalize">{plan}</span>
-          </div>
-          
-          {plan !== 'subscription' && (
-            <div className="flex justify-between">
-              <span>Weight:</span>
-              <span className="font-medium">{kilos} kg</span>
-            </div>
-              )}
-            </>
-          ) : (
-            product && (
-              <div className="flex justify-between">
-                <span>Product:</span>
-                <span className="font-medium">{product.name}</span>
+          {/* List all items in cart */}
+          <div className="space-y-3">
+            {items.map((item: CartItem) => (
+              <div key={item.id} className="flex justify-between items-center py-2 border-b">
+                <div>
+                  <p className="font-medium">{item.name}</p>
+                  <p className="text-sm text-gray-600">
+                    Qty: {item.quantity} × KES {item.price}
+                  </p>
+                </div>
+                <span className="font-medium">
+                  KES {(item.price * item.quantity).toLocaleString()}
+                </span>
               </div>
-            )
-          )}
+            ))}
+          </div>
           
           <Separator />
           
           <div className="flex justify-between text-lg font-bold">
             <span>Total:</span>
-            <span>KES {orderDetails.price.toLocaleString()}</span>
+            <span>KES {totalPrice.toLocaleString()}</span>
           </div>
           
-          {orderType === 'service' && (
-          <div className="bg-blue-50 p-3 rounded-md mt-4">
-            <div className="flex items-start gap-2">
-              <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium">Free pickup for orders:</p>
-                <p className="text-gray-600">
-                  {plan === 'basic' ? '5kg or more' : 'All premium & subscription plans'}
-                </p>
+          {hasLaundryService && (
+            <div className="bg-blue-50 p-3 rounded-md mt-4">
+              <div className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium">Free pickup for laundry orders:</p>
+                  <p className="text-gray-600">
+                    5kg or more for basic plans, all premium & subscription plans
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
           )}
         </CardContent>
       </Card>
@@ -220,38 +169,63 @@ function CheckoutClient() {
       {/* Order Form */}
       <Card className="md:col-span-2">
         <CardHeader>
-          <CardTitle>{orderType === 'service' ? 'Pickup Details' : 'Delivery Details'}</CardTitle>
+          <CardTitle>Delivery Details</CardTitle>
           <CardDescription>Enter your information</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {orderType === 'service' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="pickupDate">Pickup Date</Label>
+                <Label htmlFor="fullName">Full Name</Label>
                 <Input 
-                  id="pickupDate" 
-                  name="pickupDate" 
-                  type="date" 
-                  min={tomorrowFormatted}
-                  value={orderDetails.pickupDate}
+                  id="fullName" 
+                  name="fullName" 
+                  value={orderDetails.fullName}
                   onChange={handleInputChange}
                   required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="pickupTime">Preferred Time</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input 
-                  id="pickupTime" 
-                  name="pickupTime" 
-                  type="time"
-                  value={orderDetails.pickupTime}
+                  id="email" 
+                  name="email"
+                  type="email"
+                  value={orderDetails.email}
                   onChange={handleInputChange}
                   required
                 />
               </div>
             </div>
+            
+            {hasLaundryService && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="pickupDate">Pickup Date</Label>
+                  <Input 
+                    id="pickupDate" 
+                    name="pickupDate" 
+                    type="date" 
+                    min={tomorrowFormatted}
+                    value={orderDetails.pickupDate}
+                    onChange={handleInputChange}
+                    required={hasLaundryService}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="pickupTime">Preferred Time</Label>
+                  <Input 
+                    id="pickupTime" 
+                    name="pickupTime" 
+                    type="time"
+                    value={orderDetails.pickupTime}
+                    onChange={handleInputChange}
+                    required={hasLaundryService}
+                  />
+                </div>
+              </div>
             )}
             
             <div className="space-y-2">
@@ -312,18 +286,16 @@ function CheckoutClient() {
               />
             </div>
             
-            {orderType === 'service' && (
             <div className="space-y-2">
               <Label htmlFor="notes">Special Instructions (Optional)</Label>
               <Textarea 
                 id="notes" 
                 name="notes"
-                placeholder="Any special instructions for pickup..."
+                placeholder="Any special instructions for pickup or delivery..."
                 value={orderDetails.notes}
                 onChange={handleInputChange}
               />
             </div>
-            )}
             
             {/* Payment Method Selection */}
             <div className="mt-6">
@@ -417,7 +389,7 @@ function CheckoutClient() {
               className="w-full bg-blue-600 hover:bg-blue-700 mt-6"
               disabled={loading}
             >
-              {loading ? 'Processing...' : `Pay KES ${orderDetails.price.toLocaleString()}`}
+              {loading ? 'Processing...' : `Pay KES ${totalPrice.toLocaleString()}`}
             </Button>
           </form>
         </CardContent>

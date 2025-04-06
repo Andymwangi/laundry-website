@@ -92,7 +92,7 @@ const Testimonials = () => {
     <section className="py-20 bg-gray-50" id="testimonials">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <motion.p 
+          <motion.div 
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
@@ -100,9 +100,9 @@ const Testimonials = () => {
             className="text-blue-600 font-medium mb-3"
           >
             Testimonials
-          </motion.p>
+          </motion.div>
           
-          <motion.h2 
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -110,9 +110,9 @@ const Testimonials = () => {
             className="text-3xl md:text-4xl font-bold mb-6"
           >
             What Our Customers Say
-          </motion.h2>
+          </motion.div>
           
-          <motion.p 
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -120,7 +120,7 @@ const Testimonials = () => {
             className="max-w-2xl mx-auto text-slate-600"
           >
             Discover why thousands of customers trust Laundry Basket with their garments. Our commitment to quality and customer satisfaction speaks through their experiences.
-          </motion.p>
+          </motion.div>
         </div>
         
         <div className="relative">

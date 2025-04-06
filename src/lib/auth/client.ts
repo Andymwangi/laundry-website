@@ -36,22 +36,30 @@ export async function signIn(email: string, password: string): Promise<AuthRespo
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ email, password }),
+      credentials: 'include',
     });
-    
-    const data = await response.json();
-    
+
     if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Login error:', errorData);
       return { 
         success: false, 
-        error: data.error || 'Login failed' 
+        error: errorData.error || 'Failed to login. Please check your credentials.' 
       };
     }
+
+    const data = await response.json();
+    console.log('Login success response:', data);
     
-    return { success: true, user: data.user };
+    return {
+      success: true,
+      user: data.user
+    };
   } catch (error) {
+    console.error('Login error:', error);
     return { 
       success: false, 
-      error: 'An unexpected error occurred' 
+      error: error instanceof Error ? error.message : 'An unexpected error occurred' 
     };
   }
 }

@@ -6,7 +6,7 @@ const key = new TextEncoder().encode(secretKey);
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("auth-token")?.value;
+  const token = request.cookies.get("auth_token")?.value;
   
   // Check if user is authenticated
   let isAuthenticated = false;

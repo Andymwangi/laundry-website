@@ -8,7 +8,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { signUp } from "@/lib/auth/client";
+import { useAuth } from "@/lib/auth/auth-context";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,6 +24,7 @@ const formSchema = z.object({
 
 export function SignupForm() {
   const router = useRouter();
+  const { register, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 // First, update the state definition to properly type the values
 const [searchParamsData, setSearchParamsData] = useState<{
@@ -62,25 +63,29 @@ useEffect(() => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const result = await signUp({
+      // Determine the redirection path
+      let targetRedirect = '';
+      if (searchParamsData.plan) {
+        targetRedirect = `/dashboard/checkout?plan=${searchParamsData.plan}${searchParamsData.kilos ? `&kilos=${searchParamsData.kilos}` : ''}`;
+      } else if (searchParamsData.returnUrl) {
+        targetRedirect = searchParamsData.returnUrl;
+      } else {
+        targetRedirect = '/dashboard';
+      }
+
+      // Use the register function from auth context
+      const result = await register({
         name: values.name,
         email: values.email,
         password: values.password,
-      });
+      }, targetRedirect);
       
       if (result.success) {
         toast.success("Account created successfully!", {
-          description: "Please log in with your new account.",
+          description: "Welcome to Laundry Basket!",
         });
         
-        // Redirect to login with the same query parameters
-        const queryParams = new URLSearchParams();
-        if (searchParamsData.plan) queryParams.set('plan', searchParamsData.plan);
-        if (searchParamsData.kilos) queryParams.set('kilos', searchParamsData.kilos);
-        if (searchParamsData.returnUrl) queryParams.set('returnUrl', searchParamsData.returnUrl);
-        
-        const queryString = queryParams.toString();
-        router.push(`/auth/login${queryString ? `?${queryString}` : ''}`);
+        // The redirect will be handled by the register function
       } else {
         toast.error("Registration failed", {
           description: result.error || "This email may already be in use.",

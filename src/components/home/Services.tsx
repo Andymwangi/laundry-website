@@ -81,7 +81,7 @@ const Services = () => {
     <section className="py-16 bg-white" id="services">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <motion.p 
+          <motion.div 
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
@@ -89,9 +89,9 @@ const Services = () => {
             className="text-blue-600 font-medium mb-3"
           >
             Our Services
-          </motion.p>
+          </motion.div>
           
-          <motion.h2 
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -99,9 +99,9 @@ const Services = () => {
             className="text-3xl md:text-4xl font-bold mb-6"
           >
             We offer different services<br />to take care of your clothes
-          </motion.h2>
+          </motion.div>
           
-          <motion.p 
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -109,7 +109,7 @@ const Services = () => {
             className="max-w-2xl mx-auto text-slate-600"
           >
             From everyday essentials to specialty garments, our comprehensive laundry solutions ensure your clothes receive the best care with attention to detail and quality results.
-          </motion.p>
+          </motion.div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

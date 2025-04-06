@@ -21,46 +21,49 @@ export function LoginForm() {
   const router = useRouter();
   const { login, user, loading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
- // First, update the state definition to properly type the values
-const [searchParamsData, setSearchParamsData] = useState<{
-  returnUrl: string | null;
-  plan: string | null;
-  kilos: string | null;
-}>({
-  returnUrl: null,
-  plan: null,
-  kilos: null
-});
-
-// Now the useEffect will work without type errors
-useEffect(() => {
-  // Only run in the browser environment
-  if (typeof window !== 'undefined') {
-    const params = new URLSearchParams(window.location.search);
-    setSearchParamsData({
-      returnUrl: params.get('returnUrl'),
-      plan: params.get('plan'),
-      kilos: params.get('kilos')
-    });
-  }
-}, []);
-  // Build redirect path
-  const redirectPath = searchParamsData.plan 
-    ? `/dashboard/orders?plan=${searchParamsData.plan}${searchParamsData.kilos ? `&kilos=${searchParamsData.kilos}` : ''}`
-    : searchParamsData.returnUrl || '/dashboard/orders';
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
-  // If user is already logged in, redirect them
+  // First, update the state definition to properly type the values
+  const [searchParamsData, setSearchParamsData] = useState<{
+    returnUrl: string | null;
+    plan: string | null;
+    kilos: string | null;
+  }>({
+    returnUrl: null,
+    plan: null,
+    kilos: null
+  });
+
+  // Now the useEffect will work without type errors
   useEffect(() => {
-    if (user && !authLoading) {
-      if (searchParamsData.plan) {
-        router.push(`/dashboard/orders?plan=${searchParamsData.plan}${searchParamsData.kilos ? `&kilos=${searchParamsData.kilos}` : ''}`);
-      } else if (searchParamsData.returnUrl) {
-        router.push(searchParamsData.returnUrl);
-      } else {
-        router.push('/dashboard/orders');
-      }
+    // Only run in the browser environment
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const searchData = {
+        returnUrl: params.get('returnUrl'),
+        plan: params.get('plan'),
+        kilos: params.get('kilos')
+      };
+      console.log("Search params detected:", searchData);
+      setSearchParamsData(searchData);
     }
-  }, [user, authLoading, router, searchParamsData]);
+  }, []);
+
+  // Build consistent redirect path for checkout
+  const redirectPath = searchParamsData.plan 
+    ? `/dashboard/checkout?plan=${searchParamsData.plan}${searchParamsData.kilos ? `&kilos=${searchParamsData.kilos}` : ''}`
+    : searchParamsData.returnUrl || '/dashboard';
+  
+  // If user is already logged in on initial load, redirect them
+  useEffect(() => {
+    if (isInitialLoad && user && !authLoading) {
+      console.log("Initial load with user already logged in, redirecting to:", redirectPath);
+      router.push(redirectPath);
+      setIsInitialLoad(false);
+    } else if (!authLoading) {
+      setIsInitialLoad(false);
+    }
+  }, [user, authLoading, router, redirectPath, isInitialLoad]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,21 +75,42 @@ useEffect(() => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    console.log("Login form submitted");
     try {
-      const result = await login(values.email, values.password, redirectPath);
+      // Determine the redirection path
+      let targetRedirect = '';
+      if (searchParamsData.plan) {
+        targetRedirect = `/dashboard/checkout?plan=${searchParamsData.plan}${searchParamsData.kilos ? `&kilos=${searchParamsData.kilos}` : ''}`;
+      } else if (searchParamsData.returnUrl) {
+        targetRedirect = searchParamsData.returnUrl;
+      } else {
+        targetRedirect = '/dashboard';
+      }
+
+      console.log("Attempting login with redirect to:", targetRedirect);
+
+      // Attempt login with the explicit redirect path
+      const result = await login(values.email, values.password, targetRedirect);
       
       if (result.success) {
+        console.log("Login successful, expect redirect to:", targetRedirect);
         toast.success("Login successful", {
           description: "Welcome back to Laundry Basket!",
         });
         
-        // The redirect will be handled by the AuthContext useEffect
+        // Force redirect as a backup in case auth context doesn't do it
+        setTimeout(() => {
+          console.log("Forcing redirect to:", targetRedirect);
+          router.push(targetRedirect);
+        }, 500);
       } else {
+        console.error("Login failed:", result.error);
         toast.error("Login failed", {
           description: result.error || "Please check your credentials and try again.",
         });
       }
     } catch (error) {
+      console.error("Login error:", error);
       toast.error("Login failed", {
         description: "An unexpected error occurred.",
       });
